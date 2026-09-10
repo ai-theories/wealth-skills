@@ -1,0 +1,23 @@
+{
+  "name": "@wealth-skills/core",
+  "version": "0.1.0",
+  "description": "Enterprise AI skill library and Model Context Protocol tools for US Wealth Management.",
+  "main": "src/index.js",
+  "type": "module",
+  "bin": {
+    "wealth-skills": "./bin/wealth-skills.js"
+  },
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "proofs": "node bin/run-empirical-proofs.js"
+  },
+  "keywords": [
+    "wealth-management",
+    "ai-agents",
+    "mcp",
+    "financial-planning",
+    "portfolio-rebalance"
+  ],
+  "author": "WealthSkills AI",
+  "license": "MIT"
+}

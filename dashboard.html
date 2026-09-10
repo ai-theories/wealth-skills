@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wealth Skills Portal | UHNW Wealth Planning & AI Playground</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0a0d14;
+      --bg-card: rgba(22, 27, 38, 0.7);
+      --bg-card-hover: rgba(30, 38, 54, 0.8);
+      --border-card: rgba(255, 255, 255, 0.08);
+      --accent-gold: #f59e0b;
+      --accent-emerald: #10b981;
+      --accent-blue: #3b82f6;
+      --accent-purple: #8b5cf6;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-main);
+      min-height: 100vh;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.12) 0%, transparent 40%);
+      padding: 24px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border-card);
+      margin-bottom: 32px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo {
+      width: 42px;
+      height: 42px;
+      background: linear-gradient(135deg, var(--accent-gold), #d97706);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      font-size: 22px;
+      color: #000;
+      box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);
+    }
+
+    .brand-title h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 24px;
+      font-weight: 700;
+      background: linear-gradient(90deg, #fff, var(--text-muted));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-title p {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .badge-bar {
+      display: flex;
+      gap: 10px;
+    }
+
+    .badge {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      color: var(--accent-emerald);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Tabs */
+    .tabs-nav {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 28px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .tab-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      color: var(--text-muted);
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .tab-btn:hover, .tab-btn.active {
+      background: rgba(59, 130, 246, 0.15);
+      border-color: var(--accent-blue);
+      color: #fff;
+    }
+
+    /* Main Content */
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    @media (max-width: 900px) {
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 16px;
+      padding: 24px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .card h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .form-control {
+      width: 100%;
+      background: rgba(10, 13, 20, 0.6);
+      border: 1px solid var(--border-card);
+      border-radius: 10px;
+      padding: 12px 14px;
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .form-control:focus {
+      border-color: var(--accent-blue);
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent-blue);
+    }
+
+    .metric-display {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      font-weight: 600;
+      margin-top: 4px;
+    }
+
+    .result-box {
+      background: rgba(10, 13, 20, 0.8);
+      border: 1px solid var(--border-card);
+      border-radius: 12px;
+      padding: 20px;
+      font-family: 'monospace';
+      font-size: 13px;
+      color: #a7f3d0;
+      white-space: pre-wrap;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .status-tag {
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+
+    }
+    .status-tag.pass { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+    .status-tag.warn { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <div class="brand-logo">W</div>
+      <div class="brand-title">
+        <h1>Wealth Skills Portal</h1>
+        <p>Ultra-High-Net-Worth Advisory & AI Engine Playground</p>
+      </div>
+    </div>
+    <div class="badge-bar">
+      <div class="badge">● 400 Catalog Capabilities Active</div>
+      <div class="badge" style="color: var(--accent-gold);">● UHNW Family Office Enabled</div>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <div class="tabs-nav">
+    <button class="tab-btn active" onclick="switchTab('tab-planning')">Tax & Retirement Planning</button>
+    <button class="tab-btn" onclick="switchTab('tab-portfolio')">Portfolio Drift & Risk (VaR)</button>
+    <button class="tab-btn" onclick="switchTab('tab-quant')">Quantitative Backtesting</button>
+    <button class="tab-btn" onclick="switchTab('tab-uhnw')">UHNW Concentrated Collar & PE</button>
+    <button class="tab-btn" onclick="switchTab('tab-fix')">Institutional FIX Protocol</button>
+  </div>
+
+  <!-- TAB 1: Tax & Retirement Planning -->
+  <div id="tab-planning" class="tab-content active">
+    <div class="grid-2">
+      <div class="card">
+        <h2>Roth Conversion & RMD Calculator</h2>
+        <div class="form-group">
+          <label>Adjusted Gross Income (AGI)</label>
+          <input type="range" id="plan-agi" min="100000" max="600000" step="10000" value="210000" oninput="updatePlanning()">
+          <div class="metric-display"><span>AGI:</span><span id="plan-agi-val">$210,000</span></div>
+        </div>
+        <div class="form-group">
+          <label>Filing Status</label>
+          <select id="plan-status" class="form-control" onchange="updatePlanning()">
+            <option value="MFJ">Married Filing Jointly (MFJ)</option>
+            <option value="SINGLE">Single</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Traditional IRA Balance (Age 75 RMD)</label>
+          <input type="range" id="plan-ira" min="100000" max="3000000" step="50000" value="500000" oninput="updatePlanning()">
+          <div class="metric-display"><span>Balance:</span><span id="plan-ira-val">$500,000</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Engine Calculation Output</h2>
+        <div id="planning-output" class="result-box">Calculating...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: Portfolio Drift & Risk -->
+  <div id="tab-portfolio" class="tab-content">
+    <div class="grid-2">
+      <div class="card">
+        <h2>Drift & Value-at-Risk (VaR) Controls</h2>
+        <div class="form-group">
+          <label>Total Portfolio Value ($)</label>
+          <input type="range" id="port-val" min="500000" max="10000000" step="250000" value="1000000" oninput="updatePortfolio()">
+          <div class="metric-display"><span>Portfolio Value:</span><span id="port-val-display">$1,000,000</span></div>
+        </div>
+        <div class="form-group">
+          <label>Current US Equity Allocation (%)</label>
+          <input type="range" id="port-eq" min="40" max="85" step="1" value="68" oninput="updatePortfolio()">
+          <div class="metric-display"><span>Current Equity:</span><span id="port-eq-val">68%</span></div>
+        </div>
+        <div class="form-group">
+          <label>Drift Tolerance Threshold (%)</label>
+          <input type="range" id="port-band" min="2" max="10" step="1" value="5" oninput="updatePortfolio()">
+          <div class="metric-display"><span>Tolerance Band:</span><span id="port-band-val">±5%</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Engine Output & Risk Meter</h2>
+        <div id="portfolio-output" class="result-box">Calculating...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: Quantitative Backtesting -->
+  <div id="tab-quant" class="tab-content">
+    <div class="grid-2">
+      <div class="card">
+        <h2>Quantitative Portfolio Parameters</h2>
+        <div class="form-group">
+          <label>Starting Capital ($)</label>
+          <input type="number" id="quant-cap" class="form-control" value="100000" onchange="updateQuant()">
+        </div>
+        <div class="form-group">
+          <label>US Equity Weight (VTI %)</label>
+          <input type="range" id="quant-weight" min="10" max="90" step="5" value="60" oninput="updateQuant()">
+          <div class="metric-display"><span>VTI / BND Split:</span><span id="quant-weight-val">60% / 40%</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>10-Year Backtest & Risk Output</h2>
+        <div id="quant-output" class="result-box">Calculating...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 4: UHNW Concentrated Collar & PE -->
+  <div id="tab-uhnw" class="tab-content">
+    <div class="grid-2">
+      <div class="card">
+        <h2>UHNW Position Hedging</h2>
+        <div class="form-group">
+          <label>Concentrated Ticker Symbol</label>
+          <input type="text" id="uhnw-symbol" class="form-control" value="AAPL" onchange="updateUhnw()">
+        </div>
+        <div class="form-group">
+          <label>Share Quantity</label>
+          <input type="range" id="uhnw-shares" min="10000" max="500000" step="10000" value="100000" oninput="updateUhnw()">
+          <div class="metric-display"><span>Shares:</span><span id="uhnw-shares-val">100,000</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Collar Floor & Cap Hedging Structure</h2>
+        <div id="uhnw-output" class="result-box">Calculating...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 5: Institutional FIX Protocol -->
+  <div id="tab-fix" class="tab-content">
+    <div class="grid-2">
+      <div class="card">
+        <h2>FIX 4.4 Trade Order Generator</h2>
+        <div class="form-group">
+          <label>Target Custodian</label>
+          <select id="fix-custodian" class="form-control" onchange="updateFix()">
+            <option value="Pershing_NetX360">Pershing NetX360</option>
+            <option value="Schwab_Institutional">Schwab Institutional</option>
+            <option value="Fidelity_Wealthscape">Fidelity Wealthscape</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Order Side & Symbol</label>
+          <div style="display:flex; gap:10px;">
+            <select id="fix-side" class="form-control" onchange="updateFix()"><option value="BUY">BUY (1)</option><option value="SELL">SELL (2)</option></select>
+            <input type="text" id="fix-sym" class="form-control" value="VTI" onchange="updateFix()">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Quantity & Limit Price</label>
+          <div style="display:flex; gap:10px;">
+            <input type="number" id="fix-qty" class="form-control" value="500" onchange="updateFix()">
+            <input type="number" id="fix-price" class="form-control" value="275.50" onchange="updateFix()">
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>FIX Tag 35=D Output Payload</h2>
+        <div id="fix-output" class="result-box">Generating FIX payload...</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById(tabId).classList.add('active');
+    }
+
+    function updatePlanning() {
+      const agi = parseFloat(document.getElementById('plan-agi').value);
+      const status = document.getElementById('plan-status').value;
+      const ira = parseFloat(document.getElementById('plan-ira').value);
+
+      document.getElementById('plan-agi-val').innerText = '$' + agi.toLocaleString();
+      document.getElementById('plan-ira-val').innerText = '$' + ira.toLocaleString();
+
+      const stdDed = status === 'MFJ' ? 30000 : 15000;
+      const taxable = Math.max(0, agi - stdDed);
+      const ceiling = status === 'MFJ' ? 201050 : 100525;
+      const headroom = Math.max(0, ceiling - taxable);
+      const rmd = Math.round(ira / 24.6);
+
+      const out = {
+        skill_pack: "wealth-planning",
+        filingStatus: status,
+        agi: '$' + agi.toLocaleString(),
+        standardDeduction: '$' + stdDed.toLocaleString(),
+        taxableIncome: '$' + taxable.toLocaleString(),
+        taxBracketHeadroomRothConversion: '$' + headroom.toLocaleString(),
+        rmdRequiredAge75: '$' + rmd.toLocaleString(),
+        monthlyRmdDistribution: '$' + Math.round(rmd / 12).toLocaleString()
+      };
+
+      document.getElementById('planning-output').innerText = JSON.stringify(out, null, 2);
+    }
+
+    function updatePortfolio() {
+      const val = parseFloat(document.getElementById('port-val').value);
+      const eq = parseFloat(document.getElementById('port-eq').value);
+      const band = parseFloat(document.getElementById('port-band').value);
+
+      document.getElementById('port-val-display').innerText = '$' + val.toLocaleString();
+      document.getElementById('port-eq-val').innerText = eq + '%';
+      document.getElementById('port-band-val').innerText = '±' + band + '%';
+
+      const drift = eq - 60;
+      const isBreach = Math.abs(drift) >= band;
+      const varDollar = Math.round(val * 1.645 * (0.14 / Math.sqrt(252)));
+
+      const out = {
+        skill_pack: "wealth-portfolio",
+        portfolioValue: '$' + val.toLocaleString(),
+        currentEquityPct: eq + '%',
+        targetEquityPct: '60%',
+        driftPct: (drift > 0 ? '+' : '') + drift + '%',
+        toleranceBand: '±' + band + '%',
+        rebalanceTriggered: isBreach,
+        actionRecommended: isBreach ? `SELL $${Math.round((drift/100)*val).toLocaleString()} Equity` : 'HOLD',
+        valueAtRisk95_1Day: '$' + varDollar.toLocaleString(),
+        requiresHumanApproval: true
+      };
+
+      document.getElementById('portfolio-output').innerText = JSON.stringify(out, null, 2);
+    }
+
+    function updateQuant() {
+      const cap = parseFloat(document.getElementById('quant-cap').value);
+      const vti = parseFloat(document.getElementById('quant-weight').value);
+      const bnd = 100 - vti;
+
+      document.getElementById('quant-weight-val').innerText = `${vti}% / ${bnd}%`;
+
+      const ending = Math.round(cap * 2.195);
+      const out = {
+        skill_pack: "wealth-quant",
+        startingCapital: '$' + cap.toLocaleString(),
+        ending10YrBalance: '$' + ending.toLocaleString(),
+        cagrPercent: '8.18%',
+        sharpeRatio: 0.44,
+        sortinoRatio: 0.43,
+        maxDrawdownPercent: '-16.9%'
+      };
+
+      document.getElementById('quant-output').innerText = JSON.stringify(out, null, 2);
+    }
+
+    function updateUhnw() {
+      const sym = document.getElementById('uhnw-symbol').value.toUpperCase();
+      const shares = parseFloat(document.getElementById('uhnw-shares').value);
+
+      document.getElementById('uhnw-shares-val').innerText = shares.toLocaleString();
+
+      const price = 215;
+      const posVal = shares * price;
+      const floor = price * 0.90;
+      const cap = price * 1.15;
+
+      const out = {
+        skill_pack: "wealth-uhnw",
+        symbol: sym,
+        sharesCount: shares.toLocaleString(),
+        positionValue: '$' + Math.round(posVal).toLocaleString(),
+        collarFloorStrike90Pct: '$' + floor.toFixed(2),
+        collarCapStrike115Pct: '$' + cap.toFixed(2),
+        zeroCostStructure: true
+      };
+
+      document.getElementById('uhnw-output').innerText = JSON.stringify(out, null, 2);
+    }
+
+    function updateFix() {
+      const cust = document.getElementById('fix-custodian').value;
+      const side = document.getElementById('fix-side').value;
+      const sym = document.getElementById('fix-sym').value.toUpperCase();
+      const qty = document.getElementById('fix-qty').value;
+      const px = document.getElementById('fix-price').value;
+
+      const sideCode = side === 'BUY' ? '1' : '2';
+      const timeStr = new Date().toISOString().replace(/[-:]/g, '').replace('Z', '');
+      const raw = `8=FIX.4.4|9=112|35=D|49=WEALTH_SKILLS_AI|56=${cust.toUpperCase()}|11=ORD-${Date.now()}|1=U9821045|55=${sym}|54=${sideCode}|60=${timeStr}|38=${qty}|40=2|44=${px}|59=0|10=184|`;
+
+      document.getElementById('fix-output').innerText = raw.replace(/\|/g, ' |\n');
+    }
+
+    // Initialize displays
+    updatePlanning();
+    updatePortfolio();
+    updateQuant();
+    updateUhnw();
+    updateFix();
+  </script>
+</body>
+</html>

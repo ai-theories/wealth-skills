@@ -1,0 +1,10 @@
+{
+  "name": "universal-wealth-server",
+  "version": "0.1.0",
+  "description": "Unified MCP server executing all 7 Wealth Skills packs locally.",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  }
+}
