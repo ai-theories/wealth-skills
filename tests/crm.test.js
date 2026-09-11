@@ -11,6 +11,18 @@ test('CRM Engine: Transcript Parsing', () => {
   assert.equal(result.actionItems[0].task, "Advisor will send proposal next week.");
 });
 
+test('CRM Engine: A Line Can Be Both A Decision And An Action Item', () => {
+  const result = parseMeetingTranscript('Client approved the plan; advisor will send the paperwork.');
+
+  assert.equal(result.extractedDecisionsCount, 1);
+  assert.equal(result.extractedActionItemsCount, 1);
+});
+
+test('CRM Engine: Keywords Match Whole Words Only', () => {
+  const result = parseMeetingTranscript('William is willing to wait.\nThe transaction settled.');
+  assert.equal(result.extractedActionItemsCount, 0);
+});
+
 test('CRM Engine: Salesforce Payload Builder', () => {
   const tasks = [{ task: "Send IRA rollover form", priority: "High" }];
   const result = buildCrmPayload('Salesforce_FSC', 'HH-100', '2026-09-09', tasks);

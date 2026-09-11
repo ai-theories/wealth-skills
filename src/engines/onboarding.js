@@ -3,20 +3,37 @@
  */
 
 export function validateCipIdentity(applicantData) {
-  const { name, ssn, dob, address, ofacStatus = 'CLEAR' } = applicantData;
+  // No default for ofacStatus: an absent field means the screen was never run, which is a
+  // failure to verify, not a pass. Defaulting it to CLEAR asserted a sanctions check that
+  // never happened. This function does not screen anything itself -- it records the result
+  // of a screen the caller performed against an actual OFAC/SDN source.
+  const { name, ssn, dob, address, ofacStatus } = applicantData || {};
 
   const flags = [];
+
+  if (!name || !String(name).trim()) {
+    flags.push('Applicant legal name missing.');
+  }
 
   if (!ssn || ssn.replace(/[^0-9]/g, '').length !== 9) {
     flags.push('Invalid SSN length or format.');
   }
 
-  if (ofacStatus !== 'CLEAR') {
+  if (!address || !String(address).trim()) {
+    flags.push('Residential address missing; CIP requires a physical address of record.');
+  }
+
+  const ofacScreened = typeof ofacStatus === 'string' && ofacStatus.trim() !== '';
+  if (!ofacScreened) {
+    flags.push('OFAC/SDN screening result not supplied; applicant has NOT been screened.');
+  } else if (ofacStatus.toUpperCase() !== 'CLEAR') {
     flags.push(`OFAC Watchlist Match Detected: ${ofacStatus}`);
   }
 
   const age = calculateAge(dob);
-  if (age < 18) {
+  if (age === null) {
+    flags.push('Date of birth missing or unparseable; age could not be verified.');
+  } else if (age < 18) {
     flags.push('Applicant is under 18; custodial account structure required.');
   }
 
@@ -26,7 +43,8 @@ export function validateCipIdentity(applicantData) {
     applicantName: name,
     age,
     cipPassed: isVerified,
-    ofacStatus,
+    ofacScreened,
+    ofacStatus: ofacScreened ? ofacStatus : 'NOT_SCREENED',
     verificationFlags: flags
   };
 }
@@ -58,8 +76,10 @@ export function checkOnboardingStatus(record) {
 }
 
 function calculateAge(dobString) {
-  if (!dobString) return 0;
+  if (!dobString) return null;
   const birth = new Date(dobString);
+  if (Number.isNaN(birth.getTime())) return null;
+
   const now = new Date();
   let age = now.getFullYear() - birth.getFullYear();
   const m = now.getMonth() - birth.getMonth();

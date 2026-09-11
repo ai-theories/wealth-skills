@@ -8,8 +8,10 @@
     "wealth-skills": "./bin/wealth-skills.js"
   },
   "scripts": {
-    "test": "node --test tests/*.test.js",
-    "proofs": "node bin/run-empirical-proofs.js"
+    "test": "node --test --test-timeout=30000 tests/*.test.js",
+    "proofs": "node bin/run-empirical-proofs.js",
+    "test:live": "WEALTH_SKILLS_LIVE_TESTS=1 node --test --test-timeout=60000 tests/live.test.js",
+    "dashboard": "node bin/serve-dashboard.js"
   },
   "keywords": [
     "wealth-management",
@@ -19,5 +21,8 @@
     "portfolio-rebalance"
   ],
   "author": "WealthSkills AI",
-  "license": "MIT"
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.11"
+  }
 }

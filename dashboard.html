@@ -201,7 +201,7 @@
       border: 1px solid var(--border-card);
       border-radius: 12px;
       padding: 20px;
-      font-family: 'monospace';
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
       font-size: 13px;
       color: #a7f3d0;
       white-space: pre-wrap;
@@ -218,9 +218,26 @@
     }
     .status-tag.pass { background: rgba(16, 185, 129, 0.2); color: #34d399; }
     .status-tag.warn { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+
+    .module-warning {
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.5);
+      color: #fde68a;
+      border-radius: 12px;
+      padding: 14px 18px;
+      margin-bottom: 24px;
+      font-size: 14px;
+    }
+    .module-warning[hidden] { display: none; }
+    .module-warning code { color: #fff; }
   </style>
 </head>
 <body>
+
+  <div id="module-warning" class="module-warning">
+    The calculators load the library engines as ES modules, which browsers block on <code>file://</code>.
+    Run <code>npm run dashboard</code> and open the printed URL.
+  </div>
 
   <header>
     <div class="brand">
@@ -231,18 +248,18 @@
       </div>
     </div>
     <div class="badge-bar">
-      <div class="badge">● 400 Catalog Capabilities Active</div>
+      <div class="badge">● Calculations run on src/engines</div>
       <div class="badge" style="color: var(--accent-gold);">● UHNW Family Office Enabled</div>
     </div>
   </header>
 
   <!-- Navigation Tabs -->
   <div class="tabs-nav">
-    <button class="tab-btn active" onclick="switchTab('tab-planning')">Tax & Retirement Planning</button>
-    <button class="tab-btn" onclick="switchTab('tab-portfolio')">Portfolio Drift & Risk (VaR)</button>
-    <button class="tab-btn" onclick="switchTab('tab-quant')">Quantitative Backtesting</button>
-    <button class="tab-btn" onclick="switchTab('tab-uhnw')">UHNW Concentrated Collar & PE</button>
-    <button class="tab-btn" onclick="switchTab('tab-fix')">Institutional FIX Protocol</button>
+    <button class="tab-btn active" data-tab="tab-planning">Tax & Retirement Planning</button>
+    <button class="tab-btn" data-tab="tab-portfolio">Portfolio Drift & Risk (VaR)</button>
+    <button class="tab-btn" data-tab="tab-quant">Quantitative Backtesting</button>
+    <button class="tab-btn" data-tab="tab-uhnw">UHNW Concentrated Collar & PE</button>
+    <button class="tab-btn" data-tab="tab-fix">Institutional FIX Protocol</button>
   </div>
 
   <!-- TAB 1: Tax & Retirement Planning -->
@@ -252,20 +269,25 @@
         <h2>Roth Conversion & RMD Calculator</h2>
         <div class="form-group">
           <label>Adjusted Gross Income (AGI)</label>
-          <input type="range" id="plan-agi" min="100000" max="600000" step="10000" value="210000" oninput="updatePlanning()">
+          <input type="range" id="plan-agi" min="100000" max="600000" step="10000" value="210000">
           <div class="metric-display"><span>AGI:</span><span id="plan-agi-val">$210,000</span></div>
         </div>
         <div class="form-group">
           <label>Filing Status</label>
-          <select id="plan-status" class="form-control" onchange="updatePlanning()">
+          <select id="plan-status" class="form-control">
             <option value="MFJ">Married Filing Jointly (MFJ)</option>
             <option value="SINGLE">Single</option>
           </select>
         </div>
         <div class="form-group">
-          <label>Traditional IRA Balance (Age 75 RMD)</label>
-          <input type="range" id="plan-ira" min="100000" max="3000000" step="50000" value="500000" oninput="updatePlanning()">
+          <label>Traditional IRA Balance (prior year-end)</label>
+          <input type="range" id="plan-ira" min="100000" max="3000000" step="50000" value="500000">
           <div class="metric-display"><span>Balance:</span><span id="plan-ira-val">$500,000</span></div>
+        </div>
+        <div class="form-group">
+          <label>Account Owner Age (for RMD)</label>
+          <input type="range" id="plan-age" min="70" max="105" step="1" value="75">
+          <div class="metric-display"><span>Age:</span><span id="plan-age-val">75</span></div>
         </div>
       </div>
       <div class="card">
@@ -282,17 +304,17 @@
         <h2>Drift & Value-at-Risk (VaR) Controls</h2>
         <div class="form-group">
           <label>Total Portfolio Value ($)</label>
-          <input type="range" id="port-val" min="500000" max="10000000" step="250000" value="1000000" oninput="updatePortfolio()">
+          <input type="range" id="port-val" min="500000" max="10000000" step="250000" value="1000000">
           <div class="metric-display"><span>Portfolio Value:</span><span id="port-val-display">$1,000,000</span></div>
         </div>
         <div class="form-group">
-          <label>Current US Equity Allocation (%)</label>
-          <input type="range" id="port-eq" min="40" max="85" step="1" value="68" oninput="updatePortfolio()">
+          <label>Current Equity Allocation (%) &mdash; target 60% equity / 40% fixed income</label>
+          <input type="range" id="port-eq" min="40" max="85" step="1" value="68">
           <div class="metric-display"><span>Current Equity:</span><span id="port-eq-val">68%</span></div>
         </div>
         <div class="form-group">
           <label>Drift Tolerance Threshold (%)</label>
-          <input type="range" id="port-band" min="2" max="10" step="1" value="5" oninput="updatePortfolio()">
+          <input type="range" id="port-band" min="2" max="10" step="1" value="5">
           <div class="metric-display"><span>Tolerance Band:</span><span id="port-band-val">±5%</span></div>
         </div>
       </div>
@@ -310,11 +332,11 @@
         <h2>Quantitative Portfolio Parameters</h2>
         <div class="form-group">
           <label>Starting Capital ($)</label>
-          <input type="number" id="quant-cap" class="form-control" value="100000" onchange="updateQuant()">
+          <input type="number" id="quant-cap" class="form-control" value="100000">
         </div>
         <div class="form-group">
           <label>US Equity Weight (VTI %)</label>
-          <input type="range" id="quant-weight" min="10" max="90" step="5" value="60" oninput="updateQuant()">
+          <input type="range" id="quant-weight" min="10" max="90" step="5" value="60">
           <div class="metric-display"><span>VTI / BND Split:</span><span id="quant-weight-val">60% / 40%</span></div>
         </div>
       </div>
@@ -332,12 +354,26 @@
         <h2>UHNW Position Hedging</h2>
         <div class="form-group">
           <label>Concentrated Ticker Symbol</label>
-          <input type="text" id="uhnw-symbol" class="form-control" value="AAPL" onchange="updateUhnw()">
+          <input type="text" id="uhnw-symbol" class="form-control" value="AAPL">
         </div>
         <div class="form-group">
           <label>Share Quantity</label>
-          <input type="range" id="uhnw-shares" min="10000" max="500000" step="10000" value="100000" oninput="updateUhnw()">
+          <input type="range" id="uhnw-shares" min="10000" max="500000" step="10000" value="100000">
           <div class="metric-display"><span>Shares:</span><span id="uhnw-shares-val">100,000</span></div>
+        </div>
+        <div class="form-group">
+          <label>Current Share Price ($) &amp; Cost Basis per Share ($)</label>
+          <div style="display:flex; gap:10px;">
+            <input type="number" id="uhnw-price" class="form-control" value="215" min="0.01" step="0.01">
+            <input type="number" id="uhnw-basis" class="form-control" value="25" min="0" step="0.01">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Put &amp; Call Premium per Share ($, optional &mdash; needed to test zero-cost)</label>
+          <div style="display:flex; gap:10px;">
+            <input type="number" id="uhnw-put-premium" class="form-control" placeholder="Put premium" min="0" step="0.01">
+            <input type="number" id="uhnw-call-premium" class="form-control" placeholder="Call premium" min="0" step="0.01">
+          </div>
         </div>
       </div>
       <div class="card">
@@ -354,7 +390,7 @@
         <h2>FIX 4.4 Trade Order Generator</h2>
         <div class="form-group">
           <label>Target Custodian</label>
-          <select id="fix-custodian" class="form-control" onchange="updateFix()">
+          <select id="fix-custodian" class="form-control">
             <option value="Pershing_NetX360">Pershing NetX360</option>
             <option value="Schwab_Institutional">Schwab Institutional</option>
             <option value="Fidelity_Wealthscape">Fidelity Wealthscape</option>
@@ -363,15 +399,15 @@
         <div class="form-group">
           <label>Order Side & Symbol</label>
           <div style="display:flex; gap:10px;">
-            <select id="fix-side" class="form-control" onchange="updateFix()"><option value="BUY">BUY (1)</option><option value="SELL">SELL (2)</option></select>
-            <input type="text" id="fix-sym" class="form-control" value="VTI" onchange="updateFix()">
+            <select id="fix-side" class="form-control"><option value="BUY">BUY (1)</option><option value="SELL">SELL (2)</option></select>
+            <input type="text" id="fix-sym" class="form-control" value="VTI">
           </div>
         </div>
         <div class="form-group">
           <label>Quantity & Limit Price</label>
           <div style="display:flex; gap:10px;">
-            <input type="number" id="fix-qty" class="form-control" value="500" onchange="updateFix()">
-            <input type="number" id="fix-price" class="form-control" value="275.50" onchange="updateFix()">
+            <input type="number" id="fix-qty" class="form-control" value="500">
+            <input type="number" id="fix-price" class="form-control" value="275.50">
           </div>
         </div>
       </div>
@@ -382,131 +418,111 @@
     </div>
   </div>
 
-  <script>
-    function switchTab(tabId) {
-      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-      event.target.classList.add('active');
-      document.getElementById(tabId).classList.add('active');
+  <script type="module">
+    import { calculateTaxBracketHeadroom, calculateRMD } from './src/engines/planning.js';
+    import { monitorPortfolioDrift, calculatePortfolioVar } from './src/engines/portfolio.js';
+    import { backtestPortfolio } from './src/engines/quant.js';
+    import { calculateCollarStrategy } from './src/engines/uhnw.js';
+    import { buildFixOrderPayload } from './src/engines/fix.js';
+
+    // Every figure on this page comes from the library engines. Nothing is recomputed or hardcoded
+    // here, so the dashboard cannot drift from the CLI and MCP tools.
+    document.getElementById('module-warning').hidden = true;
+
+    const $ = (id) => document.getElementById(id);
+    const money = (n) => '$' + Math.round(n).toLocaleString();
+    const optionalNumber = (id) => ($(id).value === '' ? null : Number($(id).value));
+
+    function render(outputId, compute) {
+      try {
+        const value = compute();
+        $(outputId).textContent = typeof value === 'string' ? value : JSON.stringify(value, null, 2);
+      } catch (err) {
+        $(outputId).textContent = `Engine error: ${err.message}`;
+      }
+    }
+
+    function switchTab(button) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.toggle('active', btn === button));
+      document.querySelectorAll('.tab-content').forEach(panel => panel.classList.toggle('active', panel.id === button.dataset.tab));
     }
 
     function updatePlanning() {
-      const agi = parseFloat(document.getElementById('plan-agi').value);
-      const status = document.getElementById('plan-status').value;
-      const ira = parseFloat(document.getElementById('plan-ira').value);
+      const agi = Number($('plan-agi').value);
+      const status = $('plan-status').value;
+      const ira = Number($('plan-ira').value);
+      const age = Number($('plan-age').value);
 
-      document.getElementById('plan-agi-val').innerText = '$' + agi.toLocaleString();
-      document.getElementById('plan-ira-val').innerText = '$' + ira.toLocaleString();
+      $('plan-agi-val').textContent = money(agi);
+      $('plan-ira-val').textContent = money(ira);
+      $('plan-age-val').textContent = String(age);
 
-      const stdDed = status === 'MFJ' ? 30000 : 15000;
-      const taxable = Math.max(0, agi - stdDed);
-      const ceiling = status === 'MFJ' ? 201050 : 100525;
-      const headroom = Math.max(0, ceiling - taxable);
-      const rmd = Math.round(ira / 24.6);
-
-      const out = {
-        skill_pack: "wealth-planning",
-        filingStatus: status,
-        agi: '$' + agi.toLocaleString(),
-        standardDeduction: '$' + stdDed.toLocaleString(),
-        taxableIncome: '$' + taxable.toLocaleString(),
-        taxBracketHeadroomRothConversion: '$' + headroom.toLocaleString(),
-        rmdRequiredAge75: '$' + rmd.toLocaleString(),
-        monthlyRmdDistribution: '$' + Math.round(rmd / 12).toLocaleString()
-      };
-
-      document.getElementById('planning-output').innerText = JSON.stringify(out, null, 2);
+      render('planning-output', () => ({
+        taxHeadroom: calculateTaxBracketHeadroom(agi, status),
+        requiredMinimumDistribution: calculateRMD(age, ira)
+      }));
     }
 
     function updatePortfolio() {
-      const val = parseFloat(document.getElementById('port-val').value);
-      const eq = parseFloat(document.getElementById('port-eq').value);
-      const band = parseFloat(document.getElementById('port-band').value);
+      const value = Number($('port-val').value);
+      const equity = Number($('port-eq').value);
+      const band = Number($('port-band').value);
 
-      document.getElementById('port-val-display').innerText = '$' + val.toLocaleString();
-      document.getElementById('port-eq-val').innerText = eq + '%';
-      document.getElementById('port-band-val').innerText = '±' + band + '%';
+      $('port-val-display').textContent = money(value);
+      $('port-eq-val').textContent = equity + '%';
+      $('port-band-val').textContent = '±' + band + '%';
 
-      const drift = eq - 60;
-      const isBreach = Math.abs(drift) >= band;
-      const varDollar = Math.round(val * 1.645 * (0.14 / Math.sqrt(252)));
-
-      const out = {
-        skill_pack: "wealth-portfolio",
-        portfolioValue: '$' + val.toLocaleString(),
-        currentEquityPct: eq + '%',
-        targetEquityPct: '60%',
-        driftPct: (drift > 0 ? '+' : '') + drift + '%',
-        toleranceBand: '±' + band + '%',
-        rebalanceTriggered: isBreach,
-        actionRecommended: isBreach ? `SELL $${Math.round((drift/100)*val).toLocaleString()} Equity` : 'HOLD',
-        valueAtRisk95_1Day: '$' + varDollar.toLocaleString(),
-        requiresHumanApproval: true
-      };
-
-      document.getElementById('portfolio-output').innerText = JSON.stringify(out, null, 2);
+      render('portfolio-output', () => ({
+        drift: monitorPortfolioDrift({ equity, fixedIncome: 100 - equity }, { equity: 60, fixedIncome: 40 }, value, band),
+        valueAtRisk: calculatePortfolioVar(value, 0.14, 0.95, 1)
+      }));
     }
 
     function updateQuant() {
-      const cap = parseFloat(document.getElementById('quant-cap').value);
-      const vti = parseFloat(document.getElementById('quant-weight').value);
-      const bnd = 100 - vti;
+      const capital = Number($('quant-cap').value);
+      const vti = Number($('quant-weight').value);
 
-      document.getElementById('quant-weight-val').innerText = `${vti}% / ${bnd}%`;
-
-      const ending = Math.round(cap * 2.195);
-      const out = {
-        skill_pack: "wealth-quant",
-        startingCapital: '$' + cap.toLocaleString(),
-        ending10YrBalance: '$' + ending.toLocaleString(),
-        cagrPercent: '8.18%',
-        sharpeRatio: 0.44,
-        sortinoRatio: 0.43,
-        maxDrawdownPercent: '-16.9%'
-      };
-
-      document.getElementById('quant-output').innerText = JSON.stringify(out, null, 2);
+      $('quant-weight-val').textContent = `${vti}% / ${100 - vti}%`;
+      render('quant-output', () => backtestPortfolio({ VTI: vti / 100, BND: (100 - vti) / 100 }, capital));
     }
 
     function updateUhnw() {
-      const sym = document.getElementById('uhnw-symbol').value.toUpperCase();
-      const shares = parseFloat(document.getElementById('uhnw-shares').value);
+      const shares = Number($('uhnw-shares').value);
+      $('uhnw-shares-val').textContent = shares.toLocaleString();
 
-      document.getElementById('uhnw-shares-val').innerText = shares.toLocaleString();
-
-      const price = 215;
-      const posVal = shares * price;
-      const floor = price * 0.90;
-      const cap = price * 1.15;
-
-      const out = {
-        skill_pack: "wealth-uhnw",
-        symbol: sym,
-        sharesCount: shares.toLocaleString(),
-        positionValue: '$' + Math.round(posVal).toLocaleString(),
-        collarFloorStrike90Pct: '$' + floor.toFixed(2),
-        collarCapStrike115Pct: '$' + cap.toFixed(2),
-        zeroCostStructure: true
-      };
-
-      document.getElementById('uhnw-output').innerText = JSON.stringify(out, null, 2);
+      render('uhnw-output', () => calculateCollarStrategy(
+        $('uhnw-symbol').value.trim() || 'AAPL',
+        shares,
+        Number($('uhnw-price').value),
+        Number($('uhnw-basis').value),
+        { putPremium: optionalNumber('uhnw-put-premium'), callPremium: optionalNumber('uhnw-call-premium') }
+      ));
     }
 
     function updateFix() {
-      const cust = document.getElementById('fix-custodian').value;
-      const side = document.getElementById('fix-side').value;
-      const sym = document.getElementById('fix-sym').value.toUpperCase();
-      const qty = document.getElementById('fix-qty').value;
-      const px = document.getElementById('fix-price').value;
-
-      const sideCode = side === 'BUY' ? '1' : '2';
-      const timeStr = new Date().toISOString().replace(/[-:]/g, '').replace('Z', '');
-      const raw = `8=FIX.4.4|9=112|35=D|49=WEALTH_SKILLS_AI|56=${cust.toUpperCase()}|11=ORD-${Date.now()}|1=U9821045|55=${sym}|54=${sideCode}|60=${timeStr}|38=${qty}|40=2|44=${px}|59=0|10=184|`;
-
-      document.getElementById('fix-output').innerText = raw.replace(/\|/g, ' |\n');
+      render('fix-output', () => buildFixOrderPayload({
+        targetCustodian: $('fix-custodian').value,
+        side: $('fix-side').value,
+        symbol: $('fix-sym').value.trim() || 'VTI',
+        quantity: Number($('fix-qty').value),
+        price: Number($('fix-price').value)
+      }).fixMessageReadable.split(' | ').filter(Boolean).join('\n'));
     }
 
-    // Initialize displays
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => switchTab(btn)));
+
+    const bindings = [
+      ['plan-agi', 'input', updatePlanning], ['plan-status', 'change', updatePlanning],
+      ['plan-ira', 'input', updatePlanning], ['plan-age', 'input', updatePlanning],
+      ['port-val', 'input', updatePortfolio], ['port-eq', 'input', updatePortfolio], ['port-band', 'input', updatePortfolio],
+      ['quant-cap', 'input', updateQuant], ['quant-weight', 'input', updateQuant],
+      ['uhnw-symbol', 'input', updateUhnw], ['uhnw-shares', 'input', updateUhnw], ['uhnw-price', 'input', updateUhnw],
+      ['uhnw-basis', 'input', updateUhnw], ['uhnw-put-premium', 'input', updateUhnw], ['uhnw-call-premium', 'input', updateUhnw],
+      ['fix-custodian', 'change', updateFix], ['fix-side', 'change', updateFix], ['fix-sym', 'input', updateFix],
+      ['fix-qty', 'input', updateFix], ['fix-price', 'input', updateFix]
+    ];
+    for (const [id, eventName, handler] of bindings) $(id).addEventListener(eventName, handler);
+
     updatePlanning();
     updatePortfolio();
     updateQuant();

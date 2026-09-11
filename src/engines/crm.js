@@ -2,22 +2,30 @@
  * Wealth CRM Engine - Self-Contained Transcript Parsing & CRM Sync Logic
  */
 
+// Word boundaries keep "will" from matching "willing" or "William", and "action" from matching
+// "transaction".
+const ACTION_PATTERNS = [/\bwill\b/, /\bfollow[\s-]?up\b/, /\bsend\b/, /\bprepare\b/, /\baction\b/, /\btask\b/, /\bschedule\b/];
+const DECISION_PATTERNS = [/\bagreed\b/, /\bdecided\b/, /\bapproved\b/, /\bconfirmed\b/, /\bchose\b/, /\bselected\b/];
+
 export function parseMeetingTranscript(transcriptText) {
-  const lines = transcriptText.split('\n');
+  const lines = String(transcriptText ?? '').split('\n');
   const actionItems = [];
   const keyDecisions = [];
 
-  const ACTION_KEYWORDS = ['will', 'follow up', 'send', 'prepare', 'action', 'task', 'schedule'];
-  const DECISION_KEYWORDS = ['agreed', 'agreed to', 'decided', 'approved', 'confirmed', 'chose', 'selected'];
-
   for (const line of lines) {
-    const lower = line.toLowerCase();
-    
-    if (DECISION_KEYWORDS.some(kw => lower.includes(kw))) {
-      keyDecisions.push(line.trim());
-    } else if (ACTION_KEYWORDS.some(kw => lower.includes(kw))) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+    const lower = trimmed.toLowerCase();
+
+    // A line can be both: "Client approved the plan; advisor will send the paperwork" is a
+    // decision AND a follow-up. These were an if/else, which silently dropped the action item.
+    if (DECISION_PATTERNS.some(re => re.test(lower))) {
+      keyDecisions.push(trimmed);
+    }
+
+    if (ACTION_PATTERNS.some(re => re.test(lower))) {
       actionItems.push({
-        task: line.trim(),
+        task: trimmed,
         priority: lower.includes('urgent') || lower.includes('asap') ? 'High' : 'Normal',
         dueDateDaysOut: lower.includes('next week') ? 7 : 3
       });

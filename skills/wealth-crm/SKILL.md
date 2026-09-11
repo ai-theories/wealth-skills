@@ -1,12 +1,12 @@
 ---
 name: wealth-crm
-description: Advisor CRM workflows, client meeting preparation, meeting transcript parsing, relationship intelligence, and action item routing.
+description: Meeting transcript parsing into decisions and action items, and CRM task payload construction, plus guidance for meeting preparation. Payloads are built locally and never sent to a CRM.
 catalog_ids: ["T008", "T009", "T010", "T011", "T012", "T013", "T014", "T091"]
 ---
 
 # Wealth CRM & Meeting Intelligence (`wealth-crm`)
 
-This skill pack equips AI agents (**Claude Code, Devin, Cursor, Antigravity, OpenAI Codex**) to execute advisor meeting preparation, transcribe and summarize client review meetings, format CRM updates for Salesforce Financial Services Cloud (FSC) and Wealthbox, and track client relationship workflows with **baked-in, zero-dependency Node.js execution logic**.
+This skill pack equips AI agents (**Claude Code, Devin, Cursor, Antigravity, OpenAI Codex**) to pull decisions and follow-ups out of client meeting notes, shape them into CRM task payloads for an advisor to import, and prepare for client reviews.
 
 ---
 
@@ -14,27 +14,41 @@ This skill pack equips AI agents (**Claude Code, Devin, Cursor, Antigravity, Ope
 
 Trigger this skill when the user asks to:
 - Prepare a pre-meeting briefing pack for an upcoming client review.
-- Parse a client meeting transcript or notes and extract key decision points, life events, and follow-up action items.
-- Structure JSON/REST payloads for Salesforce FSC, Wealthbox, or Practifi CRM task updates.
+- Parse a client meeting transcript or notes and extract key decisions and follow-up action items.
+- Structure JSON task payloads for Salesforce FSC, Wealthbox or Practifi.
 
 ---
 
-## Baked-In CLI & JavaScript Engine Execution
+## Engine-Backed Capabilities
+
+| Capability | Engine function | CLI |
+|---|---|---|
+| Line-level extraction of decisions and action items | `parseMeetingTranscript` | `crm parse-transcript` |
+| CRM task payload construction (not sent) | `buildCrmPayload` | library only |
+
+## Guidance Only (No Engine Support)
+
+- Pre-meeting briefing packs and relationship intelligence
+- Sending, syncing or reading data from any CRM
+
+## Limits to State With Every Result
+
+- Extraction is whole-word keyword matching. Review the extracted items against the transcript before creating tasks; it will miss follow-ups phrased without its keywords.
+- Payloads are generic task JSON labelled with the target platform. Map them to the CRM's actual API before importing.
+
+---
+
+## CLI & Module Usage
 
 ```bash
-# Parse meeting transcript & extract decision matrix
 node bin/wealth-skills.js crm parse-transcript --text "Client agreed to rebalance into bonds. Advisor will send proposal next week."
-
-# Format output for specific AI platform UI (Claude / Codex / Cursor / Antigravity)
 node bin/wealth-skills.js ui render --platform claude --data '{"title":"Meeting Notes","summary":"Rebalance approved"}'
 ```
 
-### Baked-In Engine Module Import
 ```javascript
 import { parseMeetingTranscript, buildCrmPayload } from './src/engines/crm.js';
 
-const transcript = "Client agreed to rebalance. Advisor will send proposal next week.";
-const parsed = parseMeetingTranscript(transcript);
+const parsed = parseMeetingTranscript('Client agreed to rebalance.\nAdvisor will send proposal next week.');
 const crmPayload = buildCrmPayload('Salesforce_FSC', 'HH-9812', '2026-09-09', parsed.actionItems);
 ```
 
@@ -42,7 +56,7 @@ const crmPayload = buildCrmPayload('Salesforce_FSC', 'HH-9812', '2026-09-09', pa
 
 ## Output Standard
 
-Every response MUST format output according to the target platform UI specifications ([`docs/UI_TEMPLATES.md`](../../docs/UI_TEMPLATES.md)):
+Every response MUST format output according to the target platform UI specifications ([`docs/UI_TEMPLATES.md`](../../docs/UI_TEMPLATES.md)) and include the `auditMetadata` block returned by the tool:
 1. **Claude**: Use Artifact cards, GitHub Alerts (`> [!NOTE]`), and GFM tables.
 2. **OpenAI Codex & Canvas**: Output structured JSON payloads and standard Markdown tables.
 3. **Cursor & VS Code**: Output code diffs for CRM payload updates.

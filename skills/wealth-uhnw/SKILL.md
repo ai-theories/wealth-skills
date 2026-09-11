@@ -1,50 +1,57 @@
 ---
 name: wealth-uhnw
-description: Ultra-High-Net-Worth (UHNW) Family Office strategies, concentrated stock hedging, Private Equity J-Curve tracking, Multi-Generational Trust Allocation, and Philanthropic DAF planning.
-catalog_ids: ["T401", "T402", "T403", "T404", "T405", "T406", "T407", "T408", "T409", "T410"]
+description: Concentrated-stock collar construction with constructive-sale review, and private equity multiple tracking (TVPI, DPI, RVPI), plus guidance for trust, philanthropic and exchange-fund planning that the engines do not model.
+catalog_ids: []  # the capability catalog has no UHNW-specific entries
 ---
 
 # UHNW Family Office Skill Pack (`wealth-uhnw`)
 
-This skill pack equips AI agents (**Claude Code, Devin, Cursor, Antigravity, OpenAI Codex**) to advise Ultra-High-Net-Worth (\$10M+) clients and Family Offices on concentrated stock hedging, Private Equity / Real Estate J-Curve capital calls, dynastic trust allocations, and philanthropic foundation structures.
+This skill pack equips AI agents (**Claude Code, Devin, Cursor, Antigravity, OpenAI Codex**) to structure collars on concentrated positions, track private equity commitments, and frame the wider planning conversations for Ultra-High-Net-Worth ($10M+) clients and family offices.
 
 ---
 
-## Core Capabilities
+## Engine-Backed Capabilities
 
-### 1. Concentrated Equity Hedging Strategies (UHNW-01)
-- **Zero-Cost Collar Strategy**: Combine out-of-the-money long puts (downside protection) with short call sales to lock in a price floor without cash outlay.
-- **Covered Call Yield Generation**: Sell 30-delta OTM call options on core low-basis stock positions.
-- **Exchange Fund Structuring**: Evaluate tax-deferred diversification of concentrated stock into a private 721 exchange partnership.
+| Capability | Engine function | CLI |
+|---|---|---|
+| Collar strikes, net premium and effective floor/cap from supplied option quotes, zero-cost test, and IRC §1259 review flag | `calculateCollarStrategy` | `uhnw collar` |
+| Private equity multiples: TVPI/MOIC, DPI, RVPI and unfunded commitment | `calculatePeMetrics` | `uhnw pe-metrics` |
 
-### 2. Private Equity J-Curve & IRR Tracking (UHNW-02)
-- **Internal Rate of Return (IRR) & Multiple on Invested Capital (MOIC)**: Track TVPI (Total Value to Paid-In), DPI (Distributed to Paid-In), and RVPI (Residual Value to Paid-In).
-- **Capital Call & Distribution Cash Flow Simulator**: Model negative J-curve cash calls in years 1–3 followed by harvesting distributions in years 4–10.
+## Guidance Only (No Engine Support)
 
-### 3. Multi-Generational Dynastic Trust Allocation (UHNW-03)
-- **Generation-Skipping Transfer (GST) Tax Strategy**: Optimize asset location between Grantor Retained Annuity Trusts (GRATs), Intentionally Defective Grantor Trusts (IDGTs), and Charitable Remainder Trusts (CRTs).
+- Covered-call overlays and exchange funds (§721 partnerships)
+- IRR and J-curve capital-call and distribution modelling
+- Generation-skipping transfer planning with GRATs, IDGTs and CRTs
+- Donor-advised funds and private foundations
+
+## Limits to State With Every Result
+
+- The engine does not price options. Whether a collar is zero-cost is unknown (`null`) until you supply live put and call premiums.
+- Every collar needs tax counsel review for constructive-sale treatment under IRC §1259. No rule defines a safe band; spreads under roughly 15–20% of the share price are a common practitioner warning sign and are flagged as `narrowBand`.
 
 ---
 
-## Baked-In CLI & JavaScript Engine Execution
+## CLI & Module Usage
 
 ```bash
-# UHNW Equity Collar Strategy Builder
-node bin/wealth-skills.js uhnw collar --symbol AAPL --basis 25 --shares 100000
-
-# Private Equity J-Curve & IRR Metrics
+node bin/wealth-skills.js uhnw collar --symbol AAPL --shares 100000 --price 215 --basis 25
+node bin/wealth-skills.js uhnw collar --symbol AAPL --shares 100000 --price 215 --basis 25 --put-premium 4.10 --call-premium 4.05
 node bin/wealth-skills.js uhnw pe-metrics --commitment 5000000 --called 3000000 --distributions 1200000 --nav 3200000
 ```
 
-### Baked-In Engine Module Import
 ```javascript
 import { calculateCollarStrategy, calculatePeMetrics } from './src/engines/uhnw.js';
 
-// Calculate UHNW Concentrated Collar Floor & Cap
 const collar = calculateCollarStrategy('AAPL', 100000, 215, 25);
-console.log(collar.downsideProtectionFloor); // $193.50 (10% OTM Put)
+console.log(collar.collarParameters.putStrikeFloor); // 193.5 (10% below the $215 share price)
+console.log(collar.zeroCostStructure); // null until premiums are supplied
 
-// Calculate Private Equity TVPI & MOIC
 const pe = calculatePeMetrics(5000000, 3000000, 1200000, 3200000);
-console.log(pe.moic); // 1.47x TVPI
+console.log(pe.metrics.tvpiMoic); // '1.47x'
 ```
+
+---
+
+## Output Standard
+
+Every response MUST include the `auditMetadata` block returned by the tool and follow [`docs/UI_TEMPLATES.md`](../../docs/UI_TEMPLATES.md) for the target platform.

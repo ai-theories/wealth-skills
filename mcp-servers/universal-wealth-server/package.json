@@ -1,7 +1,7 @@
 {
   "name": "universal-wealth-server",
   "version": "0.1.0",
-  "description": "Unified MCP server executing all 7 Wealth Skills packs locally.",
+  "description": "MCP server exposing wealth-skills portfolio, quant, planning, and compliance calculations locally.",
   "main": "index.js",
   "type": "module",
   "scripts": {

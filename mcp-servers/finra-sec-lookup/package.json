@@ -1,13 +1,10 @@
 {
   "name": "mcp-finra-sec-lookup",
   "version": "0.1.0",
-  "description": "MCP server for querying SEC IAPD and FINRA BrokerCheck registration data.",
+  "description": "SAMPLE DATA ONLY: MCP server serving a fictitious registration fixture. Not connected to FINRA BrokerCheck or SEC IAPD.",
   "main": "index.js",
   "type": "module",
   "scripts": {
     "start": "node index.js"
-  },
-  "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.0.0"
   }
 }

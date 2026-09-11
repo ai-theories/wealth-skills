@@ -15,17 +15,19 @@ cp -r skills/wealth-planning/ /path/to/claude/workspace/.claude/skills/
 ```
 
 ### B. Configuring MCP Tools
-Add the Node.js MCP tools to your `claude_desktop_config.json`:
+Add the Node.js MCP servers to your `claude_desktop_config.json`, replacing the path with where you cloned the repository:
 ```json
 {
   "mcpServers": {
-    "finra-sec-lookup": {
+    "wealth-skills": {
       "command": "node",
-      "args": ["/absolute/path/to/wealth-skills/mcp-servers/finra-sec-lookup/index.js"]
+      "args": ["/absolute/path/to/wealth-skills/mcp-servers/universal-wealth-server/index.js"]
     }
   }
 }
 ```
+
+`finra-sec-lookup` is also available, but it serves a **fictitious two-record fixture** and is not connected to BrokerCheck or IAPD. Only register it for demos, never for an agent that answers real registration questions.
 
 ---
 
@@ -41,7 +43,7 @@ Always enforce the compliance guidelines defined in `docs/COMPLIANCE_GUIDELINES.
 ```
 
 ### B. Tool Schema
-Every MCP server in `wealth-skills` exposes OpenAPI / JSON Schema definitions for OpenAI function calling compatibility.
+Each MCP tool publishes a JSON Schema `inputSchema` through `tools/list`, which can be adapted into OpenAI function-calling definitions. The servers do not publish OpenAPI documents.
 
 ---
 

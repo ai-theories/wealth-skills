@@ -43,17 +43,17 @@ graph TD
 ```markdown
 # Portfolio Return & Risk Analysis
 
-The Sharpe ratio is computed as:
+The Sharpe ratio uses the arithmetic mean annual return:
 $$
-\text{Sharpe Ratio} = \frac{R_p - R_f}{\sigma_p} = \frac{0.0818 - 0.03}{0.119} = 0.44
+\text{Sharpe Ratio} = \frac{\bar{R}_p - R_f}{\sigma_p} = \frac{0.0882 - 0.03}{0.119} = 0.49
 $$
 
-### Backtest Performance (10-Year)
-| Metric | Reading | Benchmark (S&P 500) |
+### Backtest Performance (10-Year, 2015–2024)
+| Metric | 60/40 (VTI/BND) | 100% VTI |
 |---|---|---|
-| CAGR | 8.18% | 12.4% |
-| Volatility | 11.9% | 15.2% |
-| Max Drawdown | -16.9% | -24.5% |
+| CAGR | 8.18% | 12.48% |
+| Volatility | 11.9% | 16.46% |
+| Max Drawdown (year-end) | -16.9% | -19.5% |
 ```
 
 ---
@@ -72,10 +72,10 @@ $$
 - US Equity: 68.0% ($680,000)
 + US Equity: 60.0% ($600,000)
 - Fixed Income: 22.0% ($220,000)
-+ Fixed Income: 30.0% ($30,0000)
++ Fixed Income: 30.0% ($300,000)
 ```
 
-For full audit records, view [COMPLIANCE_GUIDELINES.md](file:///absolute/path/to/wealth-skills/docs/COMPLIANCE_GUIDELINES.md).
+For full audit records, view [COMPLIANCE_GUIDELINES.md](COMPLIANCE_GUIDELINES.md).
 ```
 
 ---
@@ -83,7 +83,7 @@ For full audit records, view [COMPLIANCE_GUIDELINES.md](file:///absolute/path/to
 ## 4. Google Antigravity & Gemini UI Template
 
 ### Unique Features Supported
-- **Artifact Metadata Cards**: Structured YAML/JSON metadata blocks (`audit_metadata`).
+- **Artifact Metadata Cards**: Structured YAML/JSON metadata blocks (`auditMetadata`).
 - **GitHub Alerts & GFM Tables**: Clean typography and responsive data presentation.
 
 ### Antigravity Format Example
@@ -91,18 +91,20 @@ For full audit records, view [COMPLIANCE_GUIDELINES.md](file:///absolute/path/to
 # Wealth Management Client Review
 
 > [!TIP]
-> Client is eligible for a **$21,050 Roth Conversion** under the 22% tax bracket ceiling.
+> About **$33,600** of Roth conversion income fits within the 22% bracket (tax year 2026, standard deduction only).
 
 | Parameter | Reading |
 |---|---|
 | Adjusted Gross Income (AGI) | $210,000 |
-| Estimated Taxable Income | $180,000 |
-| 22% Bracket Ceiling | $201,050 |
+| Estimated Taxable Income | $177,800 |
+| 22% Bracket Ceiling | $211,400 |
 
 ---
-audit_metadata:
+auditMetadata:
   skill_pack: "wealth-planning"
-  capability_id: "T006"
+  engine_function: "calculateTaxBracketHeadroom"
+  data_sources:
+    - "IRS Rev. Proc. 2025-32 (tax year 2026 brackets and standard deduction)"
   requires_human_approval: false
 ```
 
