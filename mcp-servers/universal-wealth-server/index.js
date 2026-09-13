@@ -11,6 +11,7 @@ import { monitorPortfolioDrift, calculatePortfolioVar } from '../../src/engines/
 import { backtestPortfolio, forwardTestSimulation } from '../../src/engines/quant.js';
 import { scanFinraRule2210 } from '../../src/engines/compliance.js';
 import { withAuditMetadata, LIBRARY_VERSION } from '../../src/engines/audit.js';
+import { withGuidance } from '../../src/engines/guidance.js';
 
 const CALLER_INPUTS = 'caller-supplied tool arguments';
 
@@ -29,7 +30,7 @@ export const server = {
         },
         required: ['weights']
       },
-      handler: (args) => withAuditMetadata(backtestPortfolio(args.weights, args.initialBalance ?? 100000), {
+      handler: (args) => withAuditMetadata(withGuidance(backtestPortfolio(args.weights, args.initialBalance ?? 100000), 'quant backtest'), {
         skillPack: 'wealth-portfolio',
         tool: 'backtest_portfolio',
         engineFunction: 'backtestPortfolio',
@@ -52,7 +53,7 @@ export const server = {
         required: ['weights']
       },
       handler: (args) => withAuditMetadata(
-        forwardTestSimulation(args.weights, args.regime ?? 'baseline', args.years ?? 5, args.trials ?? 500, { initialBalance: args.initialBalance ?? 100000 }),
+        withGuidance(forwardTestSimulation(args.weights, args.regime ?? 'baseline', args.years ?? 5, args.trials ?? 500, { initialBalance: args.initialBalance ?? 100000 }), 'quant forward-test'),
         {
           skillPack: 'wealth-portfolio',
           tool: 'forward_test_simulation',
@@ -76,7 +77,7 @@ export const server = {
         required: ['currentAlloc', 'targetAlloc', 'portfolioValue']
       },
       handler: (args) => withAuditMetadata(
-        monitorPortfolioDrift(args.currentAlloc, args.targetAlloc, args.portfolioValue, args.toleranceBandPct ?? 5.0),
+        withGuidance(monitorPortfolioDrift(args.currentAlloc, args.targetAlloc, args.portfolioValue, args.toleranceBandPct ?? 5.0), 'portfolio drift-monitor'),
         {
           skillPack: 'wealth-portfolio',
           tool: 'monitor_portfolio_drift',
@@ -100,7 +101,7 @@ export const server = {
         required: ['portfolioValue']
       },
       handler: (args) => withAuditMetadata(
-        calculatePortfolioVar(args.portfolioValue, args.annualizedVol ?? 0.14, args.confidenceLevel ?? 0.95, args.horizonDays ?? 1),
+        withGuidance(calculatePortfolioVar(args.portfolioValue, args.annualizedVol ?? 0.14, args.confidenceLevel ?? 0.95, args.horizonDays ?? 1), 'portfolio var'),
         {
           skillPack: 'wealth-portfolio',
           tool: 'calculate_portfolio_var',
@@ -121,7 +122,7 @@ export const server = {
         },
         required: ['agi']
       },
-      handler: (args) => withAuditMetadata(calculateTaxBracketHeadroom(args.agi, args.filingStatus ?? 'MFJ'), {
+      handler: (args) => withAuditMetadata(withGuidance(calculateTaxBracketHeadroom(args.agi, args.filingStatus ?? 'MFJ'), 'planning tax-headroom'), {
         skillPack: 'wealth-planning',
         tool: 'calculate_tax_headroom',
         engineFunction: 'calculateTaxBracketHeadroom',
@@ -139,7 +140,7 @@ export const server = {
         },
         required: ['text']
       },
-      handler: (args) => withAuditMetadata(scanFinraRule2210(args.text), {
+      handler: (args) => withAuditMetadata(withGuidance(scanFinraRule2210(args.text), 'compliance scan'), {
         skillPack: 'wealth-compliance',
         tool: 'scan_finra_compliance',
         engineFunction: 'scanFinraRule2210',

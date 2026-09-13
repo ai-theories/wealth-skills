@@ -75,3 +75,11 @@ test('Planning Engine: Withdrawals Grow With Inflation', () => {
   assert.equal(flat.successRatePercent, 100);
   assert.equal(inflating.successRatePercent, 0);
 });
+
+test('Planning Engine: An Unsupported Filing Status Comes Back As A Question', () => {
+  assert.throws(() => calculateTaxBracketHeadroom(150000, 'HOH'), (err) => {
+    assert.equal(err.needsInput[0].field, 'filingStatus');
+    assert.match(err.needsInput[0].question, /jointly \(MFJ\) or single/);
+    return true;
+  });
+});

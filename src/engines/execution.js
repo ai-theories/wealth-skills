@@ -1,3 +1,5 @@
+import { inputError } from './guidance.js';
+
 /**
  * Wealth Execution Engine - Self-Contained Pre-Trade Validation & Broker Payload Logic
  */
@@ -85,10 +87,15 @@ export function buildTradePayload(broker = 'Alpaca', accountId, orderDetails) {
   const { conid, secType = 'STK', currency = 'USD' } = orderDetails;
 
   if (!Number.isInteger(conid) || conid <= 0) {
-    throw new Error(
+    throw inputError(
       `Interactive Brokers order for ${String(symbol).toUpperCase()} requires a numeric 'conid' in orderDetails. ` +
       `Resolve it via GET /iserver/secdef/search?symbol=${String(symbol).toUpperCase()} and pass it explicitly; ` +
-      `IBKR routes on conid, so a placeholder would submit an order for the wrong security.`
+      `IBKR routes on conid, so a placeholder would submit an order for the wrong security.`,
+      [{
+        field: 'conid',
+        question: `What is the Interactive Brokers contract id (conid) for ${String(symbol).toUpperCase()}?`,
+        why: 'IBKR routes on conid, so the wrong value would place the order in a different security.'
+      }]
     );
   }
 

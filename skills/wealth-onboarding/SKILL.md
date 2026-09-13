@@ -48,6 +48,22 @@ const status = checkOnboardingStatus({ clientId: 'C1', cipPassed: validation.cip
 
 ---
 
+## Conversational Use
+
+Every CLI and MCP result carries two fields for the conversation itself:
+
+- **`needsInput`** - questions to put to the user before the answer is usable. Ask them as written instead of assuming a value; the engines fail closed precisely so this question gets asked.
+- **`suggestedNextSteps`** - what is worth doing next, each with a reason. Offer them rather than acting: anything with client impact still needs approval.
+
+An error can carry `needsInput` too, so a refusal to guess becomes a question rather than a dead end. `node bin/wealth-skills.js capabilities` lists every tool with its required inputs and typical phrasings.
+
+Typical requests this pack answers:
+- "Can we open this account?"
+- "Is this application complete?"
+- "Run the CIP check."
+
+---
+
 ## Output Standard & Platform Formatting
 
 Every response MUST format output according to the target platform UI specifications ([`docs/UI_TEMPLATES.md`](../../docs/UI_TEMPLATES.md)) and include the `auditMetadata` block returned by the tool:

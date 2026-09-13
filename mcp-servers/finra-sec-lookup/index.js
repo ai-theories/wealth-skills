@@ -9,6 +9,7 @@
 import { startStdioServer, isMainModule } from '../lib/stdio-server.js';
 import { parseBrokerCheckRecord } from '../../src/engines/compliance.js';
 import { withAuditMetadata, LIBRARY_VERSION } from '../../src/engines/audit.js';
+import { withGuidance } from '../../src/engines/guidance.js';
 
 export const server = {
   name: 'finra-sec-lookup',
@@ -24,7 +25,7 @@ export const server = {
         },
         required: ['crd_number']
       },
-      handler: (args) => withAuditMetadata(parseBrokerCheckRecord(args.crd_number), {
+      handler: (args) => withAuditMetadata(withGuidance(parseBrokerCheckRecord(args.crd_number), 'compliance lookup'), {
         skillPack: 'wealth-compliance',
         tool: 'lookup_registration',
         engineFunction: 'parseBrokerCheckRecord',

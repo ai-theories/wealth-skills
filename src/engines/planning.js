@@ -3,6 +3,7 @@
  */
 
 import { randomNormal, percentileSorted } from './stats.js';
+import { inputError } from './guidance.js';
 
 // Tax year 2026 federal ordinary-income brackets and standard deductions (IRS Rev. Proc. 2025-32).
 // `limit` is the top of each bracket in taxable income. The previous table was labelled 2026 but
@@ -52,7 +53,11 @@ export function calculateTaxBracketHeadroom(agi, filingStatus = 'MFJ', customDed
 
   // Other statuses (HOH, MFS) used to be computed silently with MFJ brackets.
   if (!brackets) {
-    throw new Error(`Unsupported filingStatus "${filingStatus}". Supported: ${Object.keys(TAX_BRACKETS_2026).join(', ')}.`);
+    throw inputError(`Unsupported filingStatus "${filingStatus}". Supported: ${Object.keys(TAX_BRACKETS_2026).join(', ')}.`, [{
+      field: 'filingStatus',
+      question: 'Is the household filing jointly (MFJ) or single?',
+      why: 'Only those two are modelled; head of household and married filing separately are not.'
+    }]);
   }
   if (!(Number.isFinite(agi) && agi >= 0)) throw new Error('agi must be a non-negative number.');
   if (customDeduction !== null && !(Number.isFinite(customDeduction) && customDeduction >= 0)) {

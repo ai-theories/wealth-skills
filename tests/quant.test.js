@@ -79,3 +79,17 @@ test('Quant Engine: Caller Assumptions Override Library Defaults', () => {
   assert.equal(result.volatilityPercent, 15);
   assert.match(result.assumptionsSource, /caller-supplied/);
 });
+
+test('Quant Engine: Rejected Tickers And Regimes Carry The Question To Ask', () => {
+  assert.throws(() => backtestPortfolio({ TSLA: 1 }), (err) => {
+    assert.equal(err.needsInput[0].field, 'weights');
+    assert.match(err.needsInput[0].question, /VTI, BND, VXUS, VNQ/);
+    return true;
+  });
+
+  assert.throws(() => forwardTestSimulation({ VTI: 1 }, 'recession'), (err) => {
+    assert.equal(err.needsInput[0].field, 'regime');
+    assert.match(err.needsInput[0].question, /stagflation/);
+    return true;
+  });
+});

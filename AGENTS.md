@@ -127,7 +127,7 @@ When an agent receives a query relating to US Wealth Management, it maps the use
 
 ## 🛡️ Codex Compliance & Output Specification
 
-Every agent MUST carry the `auditMetadata` block returned by the CLI or MCP tool into its final output. See [`docs/COMPLIANCE_GUIDELINES.md`](docs/COMPLIANCE_GUIDELINES.md#2-audit-trail).
+Every agent MUST carry the `auditMetadata` block returned by the CLI or MCP tool into its final output, and MUST act on the two dialogue fields that come with every result: ask the questions in `needsInput` verbatim rather than assuming values, and offer `suggestedNextSteps` rather than performing them unprompted. See [`docs/COMPLIANCE_GUIDELINES.md`](docs/COMPLIANCE_GUIDELINES.md#2-audit-trail).
 
 ```yaml
 auditMetadata:

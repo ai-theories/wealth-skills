@@ -20,6 +20,8 @@ import { renderAdaptiveUI } from '../src/engines/ui.js';
 import { buildFixOrderPayload } from '../src/engines/fix.js';
 import { calculateCollarStrategy, calculatePeMetrics } from '../src/engines/uhnw.js';
 import { withAuditMetadata } from '../src/engines/audit.js';
+import { withGuidance, listCapabilities } from '../src/engines/guidance.js';
+import { seededRandom } from '../src/engines/stats.js';
 
 const args = process.argv.slice(2);
 const command = args[0];
@@ -95,12 +97,20 @@ function noteIfSample(flags) {
   }
 }
 
+// Simulations are random by default. A seed makes a run reproducible, which is what documented
+// examples and regression tests need.
+function rngArg() {
+  return hasFlag('--seed') ? seededRandom(intArg('--seed')) : Math.random;
+}
+
 function printResult(data, audit) {
   if (typeof data === 'string') {
     console.log(data);
     return;
   }
-  console.log(JSON.stringify(withAuditMetadata(data, audit), null, 2));
+  // Questions and next steps ride along with the numbers, so an agent can carry the conversation
+  // forward instead of stopping at a result.
+  console.log(JSON.stringify(withAuditMetadata(withGuidance(data, audit?.tool), audit), null, 2));
 }
 
 function usage(line) {
@@ -118,9 +128,9 @@ JSON flags take a single-quoted JSON string. Omitted flags fall back to samples 
   uhnw pe-metrics         --commitment --called --distributions --nav
   ui render               --platform [claude|codex|cursor|antigravity] --data '<json>'
   quant backtest          --weights '<json>' [--initial --rf]
-  quant forward-test      --weights '<json>' --regime [baseline|stagflation|bull_market|bear_market] [--years --trials --initial]
+  quant forward-test      --weights '<json>' --regime [baseline|stagflation|bull_market|bear_market] [--years --trials --initial --seed]
   planning tax-headroom   --agi --status [MFJ|SINGLE]
-  planning monte-carlo    --assets --spend [--return --vol --years --trials --inflation]
+  planning monte-carlo    --assets --spend [--return --vol --years --trials --inflation --seed]
   planning rmd            --age --balance [--birth-year]
   portfolio rebalance     --current '<json>' --target '<json>' --value [--min-trade-pct]
   portfolio drift-monitor --current '<json>' --target '<json>' --value --band [--min-trade-pct]
@@ -135,6 +145,7 @@ JSON flags take a single-quoted JSON string. Omitted flags fall back to samples 
   onboarding validate-cip --applicant '<json>'
   compliance scan         --text
   compliance lookup       --crd   (SAMPLE FIXTURE ONLY - not connected to BrokerCheck or IAPD)
+  capabilities            what each command answers, what it needs, and typical phrasings
 `;
 
 function run() {
@@ -207,7 +218,7 @@ function run() {
           getArgVal('--regime', 'baseline'),
           intArg('--years', 5),
           intArg('--trials', 500),
-          { initialBalance: numArg('--initial', 100000) }
+          { initialBalance: numArg('--initial', 100000), rng: rngArg() }
         );
         return printResult(result, {
           skillPack: 'wealth-portfolio',
@@ -240,7 +251,8 @@ function run() {
           numArg('--vol', 0.12),
           intArg('--years', 30),
           intArg('--trials', 1000),
-          numArg('--inflation', 0.025)
+          numArg('--inflation', 0.025),
+          { rng: rngArg() }
         );
         return printResult(result, {
           skillPack: 'wealth-planning',
@@ -435,6 +447,11 @@ function run() {
       }
       return usage('compliance [scan|lookup]');
 
+    case 'capabilities':
+      // One call that tells an agent which command answers which kind of request, and what each needs.
+      console.log(JSON.stringify(listCapabilities(), null, 2));
+      return;
+
     case undefined:
     case 'help':
     case '--help':
@@ -452,5 +469,9 @@ try {
   run();
 } catch (err) {
   console.error(`Error: ${err.message}`);
+  // An error that names a missing input carries the question to put to the user.
+  for (const item of err.needsInput ?? []) {
+    console.error(`Ask: ${item.question}${item.why ? `  (${item.why})` : ''}`);
+  }
   process.exitCode = err instanceof UsageError ? 2 : 1;
 }

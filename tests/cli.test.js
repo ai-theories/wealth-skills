@@ -59,3 +59,64 @@ test('CLI: IBKR Payload Without A conid Exits With An Engine Error', () => {
   assert.equal(result.status, 1);
   assert.match(result.stderr, /conid/);
 });
+
+test('CLI: Results Carry Suggested Next Steps', () => {
+  const result = run('portfolio', 'drift-monitor', '--current', '{"equity":68,"fixedIncome":32}', '--target', '{"equity":60,"fixedIncome":40}', '--value', '1000000', '--band', '5');
+  const output = JSON.parse(result.stdout);
+
+  assert.ok(output.suggestedNextSteps.some(step => step.tool === 'portfolio tlh'));
+  assert.ok(output.suggestedNextSteps.every(step => step.why));
+});
+
+test('CLI: Missing Information Comes Back As A Question', () => {
+  const applicant = JSON.stringify({ name: 'Jane Doe', ssn: '123-45-6789', dob: '1990-05-15', address: '456 Elm St' });
+  const output = JSON.parse(run('onboarding', 'validate-cip', '--applicant', applicant).stdout);
+
+  assert.equal(output.cipPassed, false);
+  assert.equal(output.needsInput[0].field, 'ofacStatus');
+});
+
+test('CLI: An Engine Error Prints The Question To Ask', () => {
+  const order = JSON.stringify({ symbol: 'MSFT', action: 'BUY', quantity: 1, price: 400 });
+  const result = run('execution', 'payload', '--broker', 'IBKR', '--order', order);
+
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /^Ask: What is the Interactive Brokers contract id/m);
+});
+
+test('CLI: capabilities Lists Tools With Their Inputs', () => {
+  const result = run('capabilities');
+  const capabilities = JSON.parse(result.stdout);
+
+  assert.equal(result.status, 0);
+  assert.ok(capabilities.length >= 20);
+  assert.ok(capabilities.every(c => c.tool && c.summary && c.typicalRequests.length && c.inputs.length));
+});
+
+test('CLI: A Seeded Simulation Is Reproducible', () => {
+  const args = ['planning', 'monte-carlo', '--assets', '1250000', '--spend', '50000', '--seed', '42'];
+  const first = JSON.parse(run(...args).stdout);
+  const second = JSON.parse(run(...args).stdout);
+
+  assert.deepEqual(first.successRatePercent, second.successRatePercent);
+  assert.deepEqual(first.medianEndingBalance, second.medianEndingBalance);
+
+  // The README quotes these figures. If the engine or RNG changes they must change there too.
+  assert.equal(first.successRatePercent, 68.1);
+  assert.equal(first.medianEndingBalance, 875459);
+});
+
+test('CLI: A Seeded Forward Test Is Reproducible', () => {
+  const args = ['quant', 'forward-test', '--weights', '{"VTI":0.6,"BND":0.4}', '--regime', 'stagflation', '--seed', '7'];
+  const first = JSON.parse(run(...args).stdout);
+
+  assert.deepEqual(JSON.parse(run(...args).stdout).projections, first.projections);
+  assert.equal(first.probabilityOfGrowthPercent, 46.2); // quoted in the README
+});
+
+test('CLI: Without A Seed, Simulations Still Vary', () => {
+  const args = ['planning', 'monte-carlo', '--assets', '1250000', '--spend', '50000', '--trials', '2000'];
+  const runs = new Set([0, 1, 2].map(() => JSON.parse(run(...args).stdout).medianEndingBalance));
+
+  assert.ok(runs.size > 1, 'unseeded runs should not be identical');
+});

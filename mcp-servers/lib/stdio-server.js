@@ -71,7 +71,12 @@ export function createMessageHandler({ name, version, tools }) {
       const text = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
       return resultResponse(id, { content: [{ type: 'text', text }] });
     } catch (err) {
-      return resultResponse(id, { content: [{ type: 'text', text: `Error: ${err.message}` }], isError: true });
+      // An error naming a missing input carries the question to ask, so the model can come back to
+      // the user instead of guessing or giving up.
+      const text = err.needsInput
+        ? JSON.stringify({ error: err.message, needsInput: err.needsInput }, null, 2)
+        : `Error: ${err.message}`;
+      return resultResponse(id, { content: [{ type: 'text', text }], isError: true });
     }
   }
 }

@@ -86,3 +86,27 @@ test('MCP: Over stdio, Notifications Are Silent And Every Request Is Answered', 
   assert.equal(responses[1].result.isError, true);
   assert.equal(responses[3].error.code, -32700);
 });
+
+test('MCP: Tool Results Carry Suggested Next Steps', () => {
+  const response = call(10, 'monitor_portfolio_drift', { currentAlloc: { equity: 68, fixedIncome: 32 }, targetAlloc: { equity: 60, fixedIncome: 40 }, portfolioValue: 1000000 });
+  const payload = JSON.parse(response.result.content[0].text);
+
+  assert.ok(payload.suggestedNextSteps.some(step => step.tool === 'portfolio tlh'));
+});
+
+test('MCP: An Error Naming A Missing Input Returns The Question', () => {
+  const response = call(11, 'backtest_portfolio', { weights: { TSLA: 1 } });
+  const payload = JSON.parse(response.result.content[0].text);
+
+  assert.equal(response.result.isError, true);
+  assert.equal(payload.needsInput[0].field, 'weights');
+  assert.match(payload.needsInput[0].question, /VTI/);
+});
+
+test('MCP: A Value Outside An Enum Is Rejected Before The Engine Runs', () => {
+  // Schema validation catches this at the protocol level, so it never reaches the tool.
+  const response = call(12, 'forward_test_simulation', { weights: { VTI: 1 }, regime: 'recession' });
+
+  assert.equal(response.error.code, -32602);
+  assert.match(response.error.message, /"regime" must be one of baseline/);
+});

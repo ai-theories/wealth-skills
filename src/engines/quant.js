@@ -3,6 +3,7 @@
  */
 
 import { randomNormal, percentileSorted } from './stats.js';
+import { inputError } from './guidance.js';
 
 // Approximate calendar-year total returns for 2015-2024 (ten years). Embedded so the engine runs
 // offline; refresh from a licensed data source before relying on the figures.
@@ -127,7 +128,11 @@ export function forwardTestSimulation(weights = { VTI: 0.6, BND: 0.4 }, regime =
   const regimeKey = String(regime).toLowerCase();
   const regimeDefaults = REGIME_ASSUMPTIONS[regimeKey];
   if (!regimeDefaults) {
-    throw new Error(`Unknown regime "${regime}". Supported: ${Object.keys(REGIME_ASSUMPTIONS).join(', ')}.`);
+    throw inputError(`Unknown regime "${regime}". Supported: ${Object.keys(REGIME_ASSUMPTIONS).join(', ')}.`, [{
+      field: 'regime',
+      question: `Which regime should the projection use: ${Object.keys(REGIME_ASSUMPTIONS).join(', ')}?`,
+      why: 'Each regime carries different return and volatility assumptions.'
+    }]);
   }
   if (!Number.isInteger(years) || years <= 0) throw new Error('years must be a positive integer.');
   if (!Number.isInteger(trials) || trials <= 0) throw new Error('trials must be a positive integer.');
@@ -214,7 +219,11 @@ function normalizeWeights(weights, supportedTickers) {
     const ticker = rawTicker.toUpperCase();
     // Unknown tickers used to be silently backtested on the VTI series.
     if (!supportedTickers.includes(ticker)) {
-      throw new Error(`No return data for "${rawTicker}". Supported tickers: ${supportedTickers.join(', ')}.`);
+      throw inputError(`No return data for "${rawTicker}". Supported tickers: ${supportedTickers.join(', ')}.`, [{
+        field: 'weights',
+        question: `Which of ${supportedTickers.join(', ')} should stand in for ${rawTicker}, or should the backtest be skipped?`,
+        why: 'Only those tickers have embedded return data, and substituting one silently would misreport the result.'
+      }]);
     }
     if (!Number.isFinite(weight) || weight < 0) {
       throw new Error(`Weight for ${rawTicker} must be a non-negative number.`);
