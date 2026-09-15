@@ -4,7 +4,8 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { buildSite, SITE_URL } from '../bin/build-site.js';
+import { buildSite, SITE_URL, INDEXNOW_KEY } from '../bin/build-site.js';
+import { indexNowRequest } from '../bin/notify-indexnow.js';
 import { listCapabilities } from '../src/engines/guidance.js';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
@@ -18,7 +19,7 @@ const meta = (attr, name) => index.match(new RegExp(`<meta ${attr}="${name}" con
 
 test('Site: The Build Publishes Only The Dashboard, Engines And Discovery Files', () => {
   const files = fs.readdirSync(out).sort();
-  assert.deepEqual(files, ['.nojekyll', '404.html', 'index.html', 'llms-full.txt', 'llms.txt', 'og-image.png', 'robots.txt', 'sitemap.xml', 'src']);
+  assert.deepEqual(files, ['.nojekyll', `${INDEXNOW_KEY}.txt`, '404.html', 'index.html', 'llms-full.txt', 'llms.txt', 'og-image.png', 'robots.txt', 'sitemap.xml', 'src'].sort());
   assert.deepEqual(fs.readdirSync(path.join(out, 'src')), ['engines']);
   assert.ok(fs.readdirSync(path.join(out, 'src', 'engines')).every(f => f.endsWith('.js')));
 });
@@ -112,4 +113,27 @@ test('Site: Every Suitability Dropdown Value Is One The Engine Accepts', async (
   for (const riskTolerance of options('suit-risk')) assert.doesNotThrow(() => checkSuitability({ riskTolerance }, { riskLevel: 3 }), riskTolerance);
   for (const liquidityNeeds of options('suit-liquidity')) assert.doesNotThrow(() => checkSuitability({ liquidityNeeds }, { liquidity: 'daily' }), liquidityNeeds);
   for (const liquidity of options('suit-pliquidity')) assert.doesNotThrow(() => checkSuitability({ liquidityNeeds: 'low' }, { liquidity }), liquidity);
+});
+
+test('Site: The IndexNow Key File Matches The Notification, And Every URL Is Under The Key Location', () => {
+  assert.match(INDEXNOW_KEY, /^[a-f0-9]{32}$/);
+  assert.equal(read(`${INDEXNOW_KEY}.txt`), INDEXNOW_KEY);
+
+  const request = indexNowRequest();
+  assert.equal(request.host, 'ai-theories.github.io');
+  assert.equal(request.keyLocation, `${SITE_URL}${INDEXNOW_KEY}.txt`);
+  for (const url of request.urlList) assert.ok(url.startsWith(SITE_URL), `${url} is outside the key location's path`);
+});
+
+test('Site: The Search Phrases People Use Appear In The Title, Description And Visible Text', () => {
+  const title = index.match(/<title>([^<]+)<\/title>/)[1].toLowerCase();
+  const description = meta('name', 'description').toLowerCase();
+  const visible = index.replace(/<script[\s\S]*?<\/script>/g, '').replace(/<head>[\s\S]*?<\/head>/, '').replace(/<[^>]+>/g, ' ').toLowerCase();
+
+  assert.match(title, /claude skills for wealth management/);
+  for (const phrase of ['wealth skills', 'investing skills', 'claude code']) assert.ok(description.includes(phrase), `description lacks "${phrase}"`);
+  for (const phrase of ['claude skills for wealth management', 'investing skills', 'wealth skills', 'claude code', 'codex', 'cursor']) {
+    assert.ok(visible.includes(phrase), `visible page text lacks "${phrase}"`);
+  }
+  assert.match(read('llms.txt'), /wealth skills and investing skills for Claude, Claude Code/);
 });

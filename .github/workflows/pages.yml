@@ -46,3 +46,10 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v5
+
+      # Tell IndexNow search engines (Bing, Yandex, and DuckDuckGo through Bing) that the site changed.
+      # A failed notification must not fail the deploy.
+      - uses: actions/checkout@v7
+      - name: Notify IndexNow
+        continue-on-error: true
+        run: node bin/notify-indexnow.js

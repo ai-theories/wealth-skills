@@ -1,6 +1,6 @@
 # wealth-skills
 
-**AI skills for US wealth management.** wealth-skills gives AI agents such as Claude Code, Codex and Cursor the workflow knowledge and calculation tools to help advisors with financial planning, portfolios, trading, client onboarding, compliance, CRM, research and family-office work, with guardrails built in for a regulated industry.
+**Claude skills and AI agent skills for US wealth management and investing.** wealth-skills is an open-source set of wealth skills and investing skills that gives Claude, Claude Code, Codex, Cursor and other AI agents the workflow knowledge and calculation tools to help advisors with financial planning, portfolios, trading, client onboarding, compliance, CRM, research and family-office work, with guardrails built in for a regulated industry.
 
 It has three parts that work together:
 

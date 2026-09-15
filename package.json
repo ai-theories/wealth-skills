@@ -1,7 +1,7 @@
 {
   "name": "@wealth-skills/core",
   "version": "0.1.0",
-  "description": "Open-source AI skill packs, calculation engines, CLI and MCP servers for US wealth management: tax, portfolio, compliance and fund operations.",
+  "description": "Wealth skills and investing skills for Claude, Claude Code and AI agents: skill packs, calculation engines, CLI and MCP servers for US wealth management.",
   "main": "src/index.js",
   "type": "module",
   "bin": {
@@ -27,7 +27,15 @@
     "finra",
     "sec",
     "tax-planning",
-    "fund-administration"
+    "fund-administration",
+    "wealth-skills",
+    "investing-skills",
+    "claude-skills",
+    "claude-code",
+    "claude-code-skills",
+    "agent-skills",
+    "financial-advisor",
+    "investing"
   ],
   "homepage": "https://ai-theories.github.io/wealth-skills/",
   "repository": {

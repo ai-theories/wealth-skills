@@ -6,11 +6,12 @@
  *   index.html          the dashboard, with its search and social metadata
  *   404.html            a small not-found page that links home
  *   src/engines/*.js    the browser-safe engine modules the dashboard imports
- *   robots.txt          allows everything and points at the sitemap
+ *   robots.txt          allows everything and names the sitemap (crawlers read only the host root robots.txt, so submit the sitemap in Search Console)
  *   sitemap.xml         the published pages, dated by the last commit
  *   llms.txt            a plain summary for AI assistants and answer engines (llmstxt.org)
  *   llms-full.txt       the README and every skill pack, in one Markdown file
  *   og-image.png        the social preview image
+ *   <key>.txt           the IndexNow key, proving this site may notify search engines of updates
  *
  * llms.txt is generated from listCapabilities() and the catalog, so it cannot drift from the code.
  *
@@ -28,6 +29,9 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const SITE_URL = 'https://ai-theories.github.io/wealth-skills/';
 const REPO_URL = 'https://github.com/ai-theories/wealth-skills';
 const PACKS_DIR = path.join(root, 'skills');
+// IndexNow keys are public by design: search engines fetch this file to confirm a notification came
+// from the site owner. See bin/notify-indexnow.js.
+export const INDEXNOW_KEY = '6bd9647ed8bf0626c71c84c870b653b6';
 
 function lastModified() {
   try {
@@ -63,7 +67,7 @@ export function buildLlmsTxt() {
   const lines = [
     '# Wealth Skills',
     '',
-    `> Open-source (MIT) AI skill packs, zero-dependency calculation engines, a CLI and Model Context Protocol servers for US wealth management. Version ${LIBRARY_VERSION}. It prepares analysis and payloads for a licensed professional to review; it never submits orders, moves money or gives investment advice.`,
+    `> Open-source (MIT) wealth skills and investing skills for Claude, Claude Code, Codex and Cursor: Claude skills (SKILL.md packs) for wealth management, zero-dependency calculation engines, a CLI and Model Context Protocol servers for US wealth management. Version ${LIBRARY_VERSION}. It prepares analysis and payloads for a licensed professional to review; it never submits orders, moves money or gives investment advice.`,
     '',
     `Every capability below is available as a CLI command (\`node bin/wealth-skills.js <command>\`) and as an MCP tool. Results carry \`auditMetadata\`, \`needsInput\` (questions to ask when an input is missing) and \`suggestedNextSteps\`. ${codeBacked} of the ${catalog.items.length} resources in the US Wealth Management Capability Catalog are backed by engine code; the rest are mapped to packs as guidance or cited references.`,
     '',
@@ -164,6 +168,7 @@ export function buildSite(outDir = path.join(root, '_site')) {
   fs.writeFileSync(path.join(outDir, 'sitemap.xml'), buildSitemap());
   fs.writeFileSync(path.join(outDir, 'llms.txt'), buildLlmsTxt());
   fs.writeFileSync(path.join(outDir, 'llms-full.txt'), buildLlmsFullTxt());
+  fs.writeFileSync(path.join(outDir, `${INDEXNOW_KEY}.txt`), INDEXNOW_KEY);
   // Serve files as they are, without Jekyll processing.
   fs.writeFileSync(path.join(outDir, '.nojekyll'), '');
   return outDir;
