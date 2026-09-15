@@ -1,7 +1,7 @@
 ---
 name: wealth-onboarding
-description: Client Identification Program field checks and onboarding milestone tracking. Records the result of an OFAC screen performed elsewhere; does not itself screen sanctions lists, verify identity documents, aggregate accounts or manage e-signatures.
-catalog_ids: ["T062", "T063", "T064", "T065", "T066", "T067", "T068", "T069", "T070"]
+description: Customer Identification Program field checks, application gaps by account type (CIP, beneficial ownership, FINRA 4512, 2090, 2111 and 2165), and onboarding milestone tracking. Records the result of an OFAC screen performed elsewhere; does not itself screen sanctions lists, verify identity documents, aggregate accounts or manage e-signatures.
+catalog_ids: ["T062", "T063", "T064", "T065", "T066", "T067", "T068", "T069", "T070", "T079", "T088", "T099", "S009", "S010", "S016", "S018", "S032", "S033", "S039", "S046", "G081"]
 ---
 
 # Wealth Onboarding & Identity (`wealth-onboarding`)
@@ -16,6 +16,7 @@ This skill pack equips AI agents (**Claude Code, Devin, Cursor, Antigravity, Ope
 |---|---|---|
 | CIP field checks (legal name, SSN format, residential address, verifiable date of birth) and recording the OFAC screen result | `validateCipIdentity` | `onboarding validate-cip` |
 | Onboarding milestone tracking (CIP, W-9, custodial agreement, funding) | `checkOnboardingStatus` | library only |
+| Application gaps by account type: blocking, needed before recommendations, and recommended (CIP, FinCEN CDD, FINRA 2090/2111/2165/4512) | `identifyOnboardingGaps` | `onboarding gaps` |
 
 ## Guidance Only (No Engine Support)
 
@@ -63,6 +64,25 @@ Typical requests this pack answers:
 - "Run the CIP check."
 
 ---
+
+<!-- catalog:start -->
+## Catalog Coverage
+
+Generated from `catalog/catalog.json` by `npm run catalog`. See [CATALOG_CROSSWALK.md](../../CATALOG_CROSSWALK.md) for each item's name and what is and is not covered.
+
+This pack is assigned **21** catalog items; **10** are backed by engine code.
+
+| Tier | Items | IDs |
+|---|---:|---|
+| `engine` | 3 | T099, S016, S033 |
+| `partial-engine` | 7 | T068, T069, T070, T079, S032, S039, S046 |
+| `guidance` | 7 | T062, T063, T064, T065, T066, T067, T088 |
+| `standard-reference` | 3 | S009, S010, S018 |
+| `integration-reference` | 1 | G081 |
+
+---
+
+<!-- catalog:end -->
 
 ## Output Standard & Platform Formatting
 

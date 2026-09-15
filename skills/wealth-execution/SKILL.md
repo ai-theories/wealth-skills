@@ -1,7 +1,7 @@
 ---
 name: wealth-execution
-description: Pre-trade validation (buying power, oversell, short-term gain) and order payload construction for Alpaca, Interactive Brokers and FIX 4.4, for human-approved execution. Builds payloads only - never submits orders or connects to a custodian.
-catalog_ids: ["T042", "T043", "T044", "T045", "T046", "T047", "T048", "T049", "T050", "T051"]
+description: Pre-trade validation (buying power, oversell, short-term gain), order payload construction for Alpaca, Interactive Brokers and FIX 4.4, ISIN/CUSIP/FIGI/LEI check digits and T+1 settlement dates, for human-approved execution. Builds payloads only - never submits orders or connects to a custodian.
+catalog_ids: ["T042", "T043", "T044", "T045", "T046", "T047", "T048", "T049", "T050", "T051", "T071", "S001", "S002", "S003", "S004", "S005", "S006", "S007", "S008", "S011", "S012", "S013", "S014", "S015", "S017", "S019", "S041", "S042", "S043", "S049", "S058", "S059", "S098", "S099", "S100", "G041", "G062", "G068", "G069", "G092", "G093", "G094", "G095", "G096", "G100", "R025", "R026", "R027", "R028", "R029", "R030"]
 ---
 
 # Wealth Execution & Custody (`wealth-execution`)
@@ -24,6 +24,8 @@ This skill pack equips AI agents (**Claude Code, Devin, Cursor, Antigravity, Ope
 | Pre-trade checks: buying power, oversell against the held position, short-term gain warning | `validatePreTradeCompliance` | `execution validate` |
 | Alpaca and Interactive Brokers REST order payloads | `buildTradePayload` | `execution payload` |
 | FIX 4.4 New Order Single (35=D) with BodyLength and CheckSum | `buildFixOrderPayload` | `execution fix-payload` |
+| ISIN, CUSIP, FIGI and LEI check digits; MIC and CFI formats | `validateSecurityIdentifier` | `execution identifier` |
+| T+1 settlement dates under SEC Rule 15c6-1 | `calculateSettlementDate` | `execution settlement-date` |
 
 ## Guidance Only (No Engine Support)
 
@@ -74,6 +76,27 @@ Typical requests this pack answers:
 - "Build the order for Alpaca."
 
 ---
+
+<!-- catalog:start -->
+## Catalog Coverage
+
+Generated from `catalog/catalog.json` by `npm run catalog`. See [CATALOG_CROSSWALK.md](../../CATALOG_CROSSWALK.md) for each item's name and what is and is not covered.
+
+This pack is assigned **51** catalog items; **17** are backed by engine code.
+
+| Tier | Items | IDs |
+|---|---:|---|
+| `engine` | 2 | S013, S059 |
+| `partial-engine` | 8 | T043, T045, T071, S001, S014, S015, S019, S058 |
+| `payload-builder` | 7 | T042, T044, T046, T047, T049, T050, T051 |
+| `guidance` | 1 | T048 |
+| `standard-reference` | 17 | S002, S003, S004, S005, S006, S007, S008, S011, S012, S017, S041, S042, S043, S049, S098, S099, S100 |
+| `integration-reference` | 10 | G041, G062, G068, G069, G092, G093, G094, G095, G096, G100 |
+| `research-reference` | 6 | R025, R026, R027, R028, R029, R030 |
+
+---
+
+<!-- catalog:end -->
 
 ## Output Standard & Platform Formatting
 

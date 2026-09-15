@@ -70,6 +70,22 @@ Typical requests this pack answers:
 
 ---
 
+<!-- catalog:start -->
+## Catalog Coverage
+
+Generated from `catalog/catalog.json` by `npm run catalog`. See [CATALOG_CROSSWALK.md](../../CATALOG_CROSSWALK.md) for each item's name and what is and is not covered.
+
+This pack is assigned **8** catalog items; **8** are backed by engine code.
+
+| Tier | Items | IDs |
+|---|---:|---|
+| `partial-engine` | 3 | T013, T014, T091 |
+| `payload-builder` | 5 | T008, T009, T010, T011, T012 |
+
+---
+
+<!-- catalog:end -->
+
 ## Output Standard
 
 Every response MUST format output according to the target platform UI specifications ([`docs/UI_TEMPLATES.md`](../../docs/UI_TEMPLATES.md)) and include the `auditMetadata` block returned by the tool:

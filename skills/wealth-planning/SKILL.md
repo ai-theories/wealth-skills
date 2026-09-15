@@ -1,7 +1,7 @@
 ---
 name: wealth-planning
-description: US retirement and tax planning calculations - tax year 2026 bracket headroom for sizing Roth conversions, required minimum distributions, and retirement Monte Carlo with inflation-adjusted withdrawals - plus guidance for broader household planning that the engines do not model.
-catalog_ids: ["T001", "T002", "T003", "T004", "T005", "T006", "T007", "T082", "T083", "T084", "T085", "T086", "T087", "T088", "T089", "T090"]
+description: US retirement and tax planning calculations - tax year 2026 bracket headroom for sizing Roth conversions, required minimum distributions, retirement Monte Carlo with inflation-adjusted withdrawals, capital-loss netting and carryover, and net investment income tax - plus guidance for broader household planning that the engines do not model.
+catalog_ids: ["T001", "T002", "T003", "T004", "T005", "T006", "T007", "T082", "T083", "T084", "T085", "T086", "T089", "T090", "T100", "S061", "S062", "S063", "S064", "S065", "S067", "S068", "S069", "S073", "S074", "S075", "S076", "S079", "G082", "G083", "G084", "G085", "R031", "R032", "R033", "R034", "R035", "R036", "R037", "R038", "R044", "R045", "R046", "R047", "R048", "R049", "R050", "R091", "R092"]
 ---
 
 # Wealth Planning Skill Pack (`wealth-planning`)
@@ -27,6 +27,8 @@ Trigger this skill when the user asks to:
 | Roth conversion bracket headroom (tax year 2026, MFJ or Single, standard deduction) | `calculateTaxBracketHeadroom` | `planning tax-headroom` |
 | Required minimum distributions (Uniform Lifetime Table; RMDs start at 73, or 75 if born 1960 or later) | `calculateRMD` | `planning rmd` |
 | Retirement Monte Carlo with inflation-adjusted withdrawals | `runMonteCarloCashFlow` | `planning monte-carlo` |
+| Capital gain and loss netting, the $3,000 limit and carryover by character (IRC §§1211, 1212, 1222) | `netCapitalGainsAndLosses` | `planning capital-losses` |
+| Net investment income tax (IRC §1411) | `calculateNetInvestmentIncomeTax` | `planning niit` |
 
 ## Guidance Only (No Engine Support)
 
@@ -79,6 +81,26 @@ Typical requests this pack answers:
 - "Will their money last through retirement?"
 
 ---
+
+<!-- catalog:start -->
+## Catalog Coverage
+
+Generated from `catalog/catalog.json` by `npm run catalog`. See [CATALOG_CROSSWALK.md](../../CATALOG_CROSSWALK.md) for each item's name and what is and is not covered.
+
+This pack is assigned **49** catalog items; **15** are backed by engine code.
+
+| Tier | Items | IDs |
+|---|---:|---|
+| `engine` | 4 | S073, S074, S075, S076 |
+| `partial-engine` | 11 | T001, T002, T003, T006, T007, T082, T100, S061, S063, S068, S069 |
+| `guidance` | 8 | T004, T005, T083, T084, T085, T086, T089, T090 |
+| `standard-reference` | 5 | S062, S064, S065, S067, S079 |
+| `integration-reference` | 4 | G082, G083, G084, G085 |
+| `research-reference` | 17 | R031, R032, R033, R034, R035, R036, R037, R038, R044, R045, R046, R047, R048, R049, R050, R091, R092 |
+
+---
+
+<!-- catalog:end -->
 
 ## Output Standard
 

@@ -1,7 +1,7 @@
 ---
 name: wealth-portfolio
-description: Portfolio drift monitoring and rebalancing, parametric VaR and expected shortfall, tax-loss harvesting screens with a wash-sale look-back, and small-universe historical and forward simulations - plus guidance for accounting, attribution and risk-model workflows that the engines do not implement.
-catalog_ids: ["T015", "T016", "T017", "T018", "T019", "T020", "T021", "T022", "T023", "T024", "T025", "T026", "T027", "T028", "T029", "T030", "T031", "T032", "T033"]
+description: Portfolio drift monitoring and rebalancing, parametric VaR and expected shortfall, tax-loss harvesting screens with a wash-sale look-back, cost basis by lot, time- and money-weighted returns, Sharpe ratio reliability, and small-universe historical and forward simulations - plus guidance for accounting, attribution and risk-model workflows that the engines do not implement.
+catalog_ids: ["T015", "T016", "T017", "T018", "T020", "T021", "T022", "T024", "T025", "T026", "T027", "T028", "T029", "T030", "T031", "T032", "T033", "T087", "S066", "S070", "S071", "S072", "S081", "S083", "G001", "G002", "G003", "G004", "G005", "G006", "G007", "G008", "G009", "G010", "G012", "G013", "G014", "G015", "G016", "G020", "G021", "G022", "G023", "G024", "G025", "G026", "G027", "G028", "G029", "G030", "G050", "G051", "G052", "G053", "G054", "G055", "G058", "G061", "G086", "R001", "R002", "R003", "R004", "R005", "R006", "R007", "R008", "R009", "R010", "R011", "R012", "R013", "R014", "R015", "R016", "R017", "R018", "R019", "R020", "R021", "R022", "R023", "R024", "R041", "R042", "R043", "R051", "R052", "R053", "R054", "R055"]
 ---
 
 # Wealth Portfolio & Risk Skill Pack (`wealth-portfolio`)
@@ -30,6 +30,10 @@ Trigger this skill when the user asks to:
 | Historical backtest (VTI, BND, VXUS, VNQ; 2015–2024 annual returns) | `backtestPortfolio` | `quant backtest` |
 | Forward Monte Carlo under macro regimes | `forwardTestSimulation` | `quant forward-test` |
 | Asset-class mix, and factor or duration averages of values you supply | `analyzePortfolioFactors` | `portfolio factors` |
+| Cost basis and holding period by FIFO, specific identification or average cost | `calculateCostBasis` | `portfolio cost-basis` |
+| Time-weighted return | `calculateTimeWeightedReturn` | `portfolio twr` |
+| Money-weighted return (XIRR) | `calculateMoneyWeightedReturn` | `portfolio irr` |
+| Sharpe ratio reliability: standard error, probabilistic and deflated Sharpe ratio | `assessSharpeRatio` | `quant sharpe-stats` |
 
 ## Guidance Only (No Engine Support)
 
@@ -83,6 +87,26 @@ Typical requests this pack answers:
 - "How would a 60/40 have done?"
 
 ---
+
+<!-- catalog:start -->
+## Catalog Coverage
+
+Generated from `catalog/catalog.json` by `npm run catalog`. See [CATALOG_CROSSWALK.md](../../CATALOG_CROSSWALK.md) for each item's name and what is and is not covered.
+
+This pack is assigned **91** catalog items; **22** are backed by engine code.
+
+| Tier | Items | IDs |
+|---|---:|---|
+| `engine` | 3 | S072, R051, R055 |
+| `partial-engine` | 19 | T015, T016, T017, T018, T020, T022, T025, T026, T028, T029, T030, T031, T032, T033, T087, S066, S070, S071, S081 |
+| `guidance` | 3 | T021, T024, T027 |
+| `standard-reference` | 1 | S083 |
+| `integration-reference` | 35 | G001, G002, G003, G004, G005, G006, G007, G008, G009, G010, G012, G013, G014, G015, G016, G020, G021, G022, G023, G024, G025, G026, G027, G028, G029, G030, G050, G051, G052, G053, G054, G055, G058, G061, G086 |
+| `research-reference` | 30 | R001, R002, R003, R004, R005, R006, R007, R008, R009, R010, R011, R012, R013, R014, R015, R016, R017, R018, R019, R020, R021, R022, R023, R024, R041, R042, R043, R052, R053, R054 |
+
+---
+
+<!-- catalog:end -->
 
 ## Output Standard & Platform Formatting
 

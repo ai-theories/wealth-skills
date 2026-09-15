@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { scanFinraRule2210, parseBrokerCheckRecord } from '../src/engines/compliance.js';
+import { scanFinraRule2210 } from '../src/engines/compliance.js';
 
 test('Compliance Engine: FINRA Rule 2210 Scanner Catches Prohibited Guarantee', () => {
   const result = scanFinraRule2210('We promise a guaranteed 15% return on your investment.');
@@ -44,21 +44,66 @@ test('Compliance Engine: Catches Guarantees At Any Percentage And Typographic Va
   }
 });
 
-test('Compliance Engine: Registration Lookup Is Labelled As A Fictitious Fixture', () => {
-  const result = parseBrokerCheckRecord('5910482');
+import { checkSuitability, checkPerformanceAdvertisement } from '../src/engines/compliance.js';
 
-  assert.equal(result.found, true);
-  assert.equal(result.record.name, 'Sarah J. Miller');
-  assert.equal(result.record.registration, 'Series 65 (IAR)');
-  assert.equal(result.record.fictitious, true);
-  assert.equal(result.dataSource, 'SAMPLE_FIXTURE');
-  assert.equal(result.isAuthoritative, false);
+const RETIREE = { age: 72, otherInvestments: 'CDs', financialSituation: 'retired', taxStatus: '12%', investmentObjectives: 'income', investmentExperience: 'limited', timeHorizonYears: 3, liquidityNeeds: 'high', riskTolerance: 'conservative', investableAssets: 400000 };
+
+test('Compliance Engine: An Illiquid, Risky, Long-Dated Product Is Flagged For A Conservative Retiree', () => {
+  const result = checkSuitability(RETIREE, { riskLevel: 4, minimumHorizonYears: 7, liquidity: 'illiquid', amount: 150000 }, { limits: { maxPositionPct: 25 } });
+
+  assert.equal(result.status, 'FLAGGED');
+  assert.deepEqual(result.flags.map(f => f.check).sort(), ['concentration', 'liquidity', 'risk', 'time horizon']);
+  assert.equal(result.metrics.positionPctOfInvestableAssets, 37.5);
+  assert.equal(result.requiresHumanApproval, true);
 });
 
-test('Compliance Engine: A Fixture Miss Does Not Claim A Registry Was Queried', () => {
-  const result = parseBrokerCheckRecord('1234567');
+test('Compliance Engine: Missing Profile Factors Mean No View Rather Than A Pass', () => {
+  const result = checkSuitability({ riskTolerance: 'moderate' }, { riskLevel: 2 });
 
-  assert.equal(result.found, false);
-  assert.match(result.message, /No registry was queried/);
-  assert.doesNotMatch(result.message, /live endpoint/i);
+  assert.equal(result.status, 'NEEDS_INFORMATION');
+  assert.equal(result.missingProfileFactors.length, 8);
+});
+
+test('Compliance Engine: Turnover Is Reported But Only Flagged Against Firm Limits', () => {
+  const activity = { averageEquity: 100000, purchases: 800000, costs: 25000 };
+  const unlimited = checkSuitability(RETIREE, { riskLevel: 1 }, { activity });
+  assert.equal(unlimited.metrics.annualTurnover, 8);
+  assert.equal(unlimited.metrics.annualCostEquityPct, 25);
+  assert.ok(!unlimited.flags.some(f => f.obligation === 'quantitative')); // FINRA 2111 sets no numeric threshold
+
+  const limited = checkSuitability(RETIREE, { riskLevel: 1 }, { activity, limits: { maxTurnover: 6, maxCostEquityPct: 20 } });
+  assert.equal(limited.flags.filter(f => f.obligation === 'quantitative').length, 2);
+});
+
+test('Compliance Engine: Gross Performance Without Net And Missing Periods Violate 206(4)-1(d)', () => {
+  const result = checkPerformanceAdvertisement(
+    { showsGrossPerformance: true, showsNetPerformance: false, isPrivateFund: false, portfolioInceptionDate: '2014-01-01', periodEndDate: '2025-12-31', periodsShown: ['1y', '5y'] },
+    { asOf: '2026-09-13' }
+  );
+
+  assert.ok(result.violations.some(v => v.paragraph === '(d)(1)'));
+  assert.ok(result.violations.some(v => v.paragraph === '(d)(2)' && /10y/.test(v.detail)));
+  assert.equal(result.compliantWithPerformanceProvisions, false);
+});
+
+test('Compliance Engine: A Young Portfolio Substitutes Its Life For Longer Periods', () => {
+  const result = checkPerformanceAdvertisement(
+    { showsGrossPerformance: true, showsNetPerformance: true, netWithEqualProminence: true, netSamePeriodAndMethod: true, isPrivateFund: false, portfolioInceptionDate: '2023-03-01', periodEndDate: '2025-12-31', periodsShown: ['1y', 'life'] },
+    { asOf: '2026-09-13' }
+  );
+
+  assert.deepEqual(result.requiredPeriods, ['1y', 'life']);
+  assert.equal(result.compliantWithPerformanceProvisions, true);
+});
+
+test('Compliance Engine: Stale Periods, Extracted And Hypothetical Performance Are Checked', () => {
+  const stale = checkPerformanceAdvertisement({ isPrivateFund: false, portfolioInceptionDate: '2010-01-01', periodEndDate: '2024-12-31', periodsShown: ['1y', '5y', '10y'] }, { asOf: '2026-09-13' });
+  assert.ok(stale.violations.some(v => /calendar year-end/.test(v.requirement)));
+
+  const extracted = checkPerformanceAdvertisement({ isPrivateFund: true, extractedPerformance: true, offersTotalPortfolioPerformance: false }, { asOf: '2026-09-13' });
+  assert.ok(extracted.violations.some(v => v.paragraph === '(d)(5)'));
+
+  const hypothetical = checkPerformanceAdvertisement({ isPrivateFund: true, hypotheticalPerformance: true, hypotheticalPoliciesAdopted: true, hypotheticalAssumptionsExplained: false }, { asOf: '2026-09-13' });
+  assert.ok(hypothetical.violations.some(v => v.paragraph === '(d)(6)(ii)'));
+  assert.ok(hypothetical.unanswered.some(u => u.field === 'hypotheticalRisksExplained'));
 });

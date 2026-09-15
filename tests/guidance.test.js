@@ -117,12 +117,21 @@ import { calculatePortfolioRebalance, calculatePortfolioVar, analyzePortfolioFac
 import { backtestPortfolio, forwardTestSimulation } from '../src/engines/quant.js';
 import { validatePreTradeCompliance, buildTradePayload } from '../src/engines/execution.js';
 import { buildFixOrderPayload } from '../src/engines/fix.js';
-import { parseBrokerCheckRecord } from '../src/engines/compliance.js';
+import { lookupAdviserRegistration } from '../src/engines/registration.js';
 import { calculatePeMetrics } from '../src/engines/uhnw.js';
 import { generateCompanyTearSheet } from '../src/engines/research.js';
 import { parseMeetingTranscript } from '../src/engines/crm.js';
+import { netCapitalGainsAndLosses, calculateNetInvestmentIncomeTax, calculateCostBasis } from '../src/engines/tax.js';
+import { calculateTimeWeightedReturn, calculateMoneyWeightedReturn, assessSharpeRatio } from '../src/engines/performance.js';
+import { validateSecurityIdentifier, calculateSettlementDate } from '../src/engines/markets.js';
+import { identifyOnboardingGaps } from '../src/engines/onboarding.js';
+import { checkSuitability, checkPerformanceAdvertisement } from '../src/engines/compliance.js';
+import { buildDcfValuation } from '../src/engines/research.js';
+import { reconcileLedger, tieOutNav, checkLpCapitalStatement, trackCloseChecklist } from '../src/engines/fundops.js';
 
 const SALE_DATE = new Date('2026-06-30');
+const IAPD_FIXTURE = new URL('./fixtures/iapd/sec-firms.xml', import.meta.url).pathname;
+const IAPD_LOOKUP = await lookupAdviserRegistration({ feedPath: IAPD_FIXTURE, crd: '900002', asOf: '2026-09-13' });
 const LOSS_LOT = { id: 'L1', symbol: 'VOO', quantity: 100, purchasePrice: 500, currentPrice: 400, purchaseDate: '2020-01-01' };
 const ORDER = { symbol: 'VTI', action: 'BUY', quantity: 50, price: 275 };
 
@@ -143,11 +152,27 @@ const RESULTS = {
   'execution fix-payload': () => buildFixOrderPayload({ symbol: 'VTI', quantity: 10, price: 275 }),
   'onboarding validate-cip': () => validateCipIdentity({ name: 'Jane Doe', ssn: '123-45-6789', dob: '1990-05-15', address: '456 Elm St', ofacStatus: 'CLEAR' }),
   'compliance scan': () => scanFinraRule2210('We offer a guaranteed 15% return.'),
-  'compliance lookup': () => parseBrokerCheckRecord('5910482'),
+  'compliance lookup': () => IAPD_LOOKUP,
   'uhnw collar': () => calculateCollarStrategy('AAPL', 1000, 200, 25),
   'uhnw pe-metrics': () => calculatePeMetrics(5000000, 3000000, 1200000, 3200000),
   'research tear-sheet': () => generateCompanyTearSheet('AAPL', { marketCap: 3.25e12, price: 215, eps: 7.3, revenue: 3.8e11 }),
-  'crm parse-transcript': () => parseMeetingTranscript('Client agreed to rebalance.\nAdvisor will send the proposal next week.')
+  'crm parse-transcript': () => parseMeetingTranscript('Client agreed to rebalance.\nAdvisor will send the proposal next week.'),
+  'planning capital-losses': () => netCapitalGainsAndLosses({ shortTermLosses: 10000, longTermGains: 4000 }),
+  'planning niit': () => calculateNetInvestmentIncomeTax({ magi: 300000, netInvestmentIncome: 80000 }),
+  'portfolio cost-basis': () => calculateCostBasis({ lots: [{ id: 'A', quantity: 100, price: 50, date: '2024-01-10' }, { id: 'B', quantity: 100, price: 80, date: '2025-09-01' }], sale: { quantity: 150, date: '2026-03-01', price: 90 } }),
+  'portfolio twr': () => calculateTimeWeightedReturn([{ date: '2026-01-01', value: 100000 }, { date: '2026-12-31', value: 110000 }]),
+  'portfolio irr': () => calculateMoneyWeightedReturn([{ date: '2025-01-01', amount: -1000 }, { date: '2026-01-01', amount: 1100 }]),
+  'quant sharpe-stats': () => assessSharpeRatio([0.02, -0.01, 0.015, 0.005, -0.004, 0.012]),
+  'execution identifier': () => validateSecurityIdentifier('US0378331005'),
+  'execution settlement-date': () => calculateSettlementDate('2026-09-11'),
+  'onboarding gaps': () => identifyOnboardingGaps({ accountType: 'individual', applicants: [{ name: 'Jane Doe' }], asOf: '2026-09-13' }),
+  'compliance suitability': () => checkSuitability({ riskTolerance: 'conservative' }, { riskLevel: 4 }),
+  'compliance performance-ad': () => checkPerformanceAdvertisement({ showsGrossPerformance: true, showsNetPerformance: false, isPrivateFund: true }, { asOf: '2026-09-13' }),
+  'research dcf': () => buildDcfValuation({ freeCashFlows: [100, 110], discountRate: 0.09, terminalGrowthRate: 0.02 }),
+  'fundops reconcile': () => reconcileLedger([{ account: 'A', security: 'X', quantity: 1, marketValue: 10 }], [{ account: 'A', security: 'X', quantity: 2, marketValue: 20 }]),
+  'fundops nav-tieout': () => tieOutNav({ assets: [{ name: 'Private co', value: 100, level: 3 }], unitsOutstanding: 10 }),
+  'fundops lp-statement': () => checkLpCapitalStatement({ beginningBalance: 100, contributions: 0, distributions: 0, incomeAllocation: 0, realizedGainLoss: 0, unrealizedGainLoss: 0, managementFees: 0, performanceAllocation: 0, otherExpenses: 0, endingBalance: 100 }),
+  'fundops close-status': () => trackCloseChecklist([{ id: 'a', name: 'A', status: 'not_started', due: '2026-09-01' }], { asOf: '2026-09-07' })
 };
 
 test('Guidance: Every Registered Tool Has A Result To Exercise It', () => {
@@ -252,9 +277,19 @@ test('Guidance: A Communication Missing Disclosures Asks Whether To Add Them', (
   assert.ok(guidanceFor('compliance scan', clean).suggestedNextSteps.some(step => /principal/.test(step.action ?? '')));
 });
 
-test('Guidance: A Sample-Fixture Lookup Always Points At The Real Registries', () => {
-  const { suggestedNextSteps } = guidanceFor('compliance lookup', parseBrokerCheckRecord('5910482'));
-  assert.ok(suggestedNextSteps.some(step => /brokercheck\.finra\.org/.test(step.action ?? '')));
+test('Guidance: A Registration Lookup Escalates Disclosures And Always Points At BrokerCheck', async () => {
+  const withDisclosures = guidanceFor('compliance lookup', IAPD_LOOKUP).suggestedNextSteps;
+  assert.ok(withDisclosures.some(step => /escalate to compliance/.test(step.action ?? '')));
+  assert.ok(withDisclosures.some(step => /BrokerCheck by hand/.test(step.action ?? '')));
+
+  const miss = await lookupAdviserRegistration({ feedPath: IAPD_FIXTURE, crd: '1', asOf: '2026-09-13' });
+  assert.ok(guidanceFor('compliance lookup', miss).suggestedNextSteps.some(step => /other IAPD compilation files/.test(step.action ?? '')));
+
+  const stale = await lookupAdviserRegistration({ feedPath: IAPD_FIXTURE, crd: '900001', asOf: '2026-12-01' });
+  assert.ok(guidanceFor('compliance lookup', stale).suggestedNextSteps.some(step => /Download a current file/.test(step.action ?? '')));
+
+  const ambiguous = await lookupAdviserRegistration({ feedPath: IAPD_FIXTURE, name: 'capital', asOf: '2026-09-13' });
+  assert.match(guidanceFor('compliance lookup', ambiguous).needsInput[0].question, /2 records match "capital"/);
 });
 
 test('Guidance: A Narrow Collar Adds A Widen-The-Strikes Suggestion', () => {
@@ -276,4 +311,19 @@ test('Guidance: Harvesting With A Known Replacement Asks Nothing But Still Warns
 
   const nothingToHarvest = scanTaxLossHarvesting([{ ...LOSS_LOT, currentPrice: 505 }], 1000, SALE_DATE);
   assert.ok(guidanceFor('portfolio tlh', nothingToHarvest).suggestedNextSteps.every(step => step.tool === null));
+});
+
+test('Guidance: New Tools Ask The Questions Their Engines Cannot Answer', () => {
+  const settlement = guidanceFor('execution settlement-date', calculateSettlementDate('2026-09-11'));
+  assert.equal(settlement.needsInput[0].field, 'holidays');
+
+  const suitability = guidanceFor('compliance suitability', checkSuitability({ riskTolerance: 'moderate' }, { riskLevel: 2 }));
+  assert.equal(suitability.needsInput.length, 8);
+  assert.ok(suitability.needsInput.every(q => q.field.startsWith('profile.')));
+
+  const nav = guidanceFor('fundops nav-tieout', tieOutNav({ assets: [{ name: 'Private co', value: 100, level: 3 }], unitsOutstanding: 10 }));
+  assert.equal(nav.needsInput[0].field, 'priceDate');
+
+  const gaps = guidanceFor('onboarding gaps', identifyOnboardingGaps({ accountType: 'individual', applicants: [{ name: 'Jane Doe' }], asOf: '2026-09-13' }));
+  assert.ok(gaps.needsInput.length > 0 && gaps.needsInput.length <= 8);
 });

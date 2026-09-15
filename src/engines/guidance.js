@@ -303,14 +303,27 @@ const TOOLS = {
   },
 
   'compliance lookup': {
-    summary: 'Registration lookup against a bundled fictitious fixture. Not connected to any registry.',
-    typicalRequests: ['is this adviser registered', 'look up this CRD', 'check their disclosures'],
+    summary: 'Investment adviser registration and disclosure lookup in an SEC IAPD compilation file, by CRD or name.',
+    typicalRequests: ['is this adviser registered', 'look up this CRD', 'does this RIA have disclosures', 'which states is this adviser registered in'],
     inputs: [
-      { field: 'crd', required: true, question: 'What CRD number should I look up?', why: 'The fixture is keyed by CRD.' }
+      { field: 'feedPath', required: true, question: 'Which IAPD compilation file should I search? Download it from https://adviserinfo.sec.gov/compilation (SEC firms, state firms, or investment adviser representatives).', why: 'Lookups run on the official SEC bulk file on disk; nothing is scraped.' },
+      { field: 'crd', required: true, question: 'What is the CRD number, or the name to search for?', why: 'Records are matched by CRD, or by name when the CRD is unknown.' }
     ],
-    suggest: () => [
-      check('Verify at brokercheck.finra.org or adviserinfo.sec.gov', 'This result comes from sample data and says nothing about a real person or firm.')
-    ]
+    questions: (result) => (result.matchCount > 1
+      ? [{ field: 'crd', question: `${result.matchCount} records match "${result.query.name}". Which CRD is the one you mean?`, why: 'A name search can match unrelated firms or people.' }]
+      : []),
+    suggest: (result) => {
+      const next = [];
+      if (result.feed?.stale) next.push(check(`Download a current file from https://adviserinfo.sec.gov/compilation`, `This file is ${result.feed.ageDays ?? 'an unknown number of'} days old; registrations change daily.`));
+      if (!result.found) {
+        next.push(check('Search the other IAPD compilation files', 'Firms appear in the SEC or state file depending on where they register; individuals are in the representatives file.'));
+      }
+      if (result.matches?.some(m => m.disclosures?.anyReported)) {
+        next.push(check('Open the IAPD page for the disclosure details and escalate to compliance', 'The file flags that disclosures exist but does not describe them.'));
+      }
+      next.push(check('Check FINRA BrokerCheck by hand for broker-dealer registrations', 'IAPD files cover investment adviser registration only, and BrokerCheck terms do not allow automated lookups.'));
+      return next;
+    }
   },
 
   'uhnw collar': {
@@ -369,6 +382,263 @@ const TOOLS = {
       if (result.extractedActionItemsCount > 0) {
         next.push(check('Create the tasks in the CRM', 'Payloads are built locally and never sent anywhere.'));
       }
+      return next;
+    }
+  },
+
+  'planning capital-losses': {
+    summary: 'Nets short- and long-term gains and losses, applies the $3,000 limit, and carries the rest forward by character.',
+    typicalRequests: ['how much of this loss can they deduct', 'what carries over to next year', 'net my gains and losses'],
+    inputs: [
+      { field: 'shortTermLosses', required: true, question: 'What are the year’s short- and long-term realized gains and losses, and any carryover from last year?', why: 'Netting happens within each term before the terms offset each other.' },
+      { field: 'filingStatus', required: false, question: 'Are they married filing separately?', why: 'The deduction limit is $1,500 instead of $3,000 when filing separately.' },
+      { field: 'taxableIncome', required: false, question: 'What is taxable income for the year?', why: 'If taxable income is negative, part of the deduction goes unused and carries forward.' }
+    ],
+    suggest: (result) => {
+      const next = [];
+      const carry = result.shortTermCarryover + result.longTermCarryover;
+      if (carry > 0) {
+        next.push(check(`Record the $${carry.toLocaleString('en-US')} carryover ($${result.shortTermCarryover.toLocaleString('en-US')} short-term, $${result.longTermCarryover.toLocaleString('en-US')} long-term) for next year`, 'Carryovers keep their character and are entered on next year’s Schedule D.'));
+      }
+      if (result.netCapitalGainOrLoss > 0) next.push(step('portfolio tlh', 'There is a net gain this year; harvesting losses before year end would offset it.'));
+      next.push(check('Confirm against Form 8949 and Schedule D with the tax preparer', 'Rate tiers, collectibles and unrecaptured §1250 gain are not modelled.'));
+      return next;
+    }
+  },
+
+  'planning niit': {
+    summary: 'Net investment income tax: 3.8% on the lesser of investment income or MAGI above the statutory threshold.',
+    typicalRequests: ['will they owe the 3.8% tax', 'net investment income tax', 'NIIT on this sale'],
+    inputs: [
+      { field: 'magi', required: true, question: 'What is modified adjusted gross income for the year?', why: 'The tax applies only to MAGI above the threshold.' },
+      { field: 'netInvestmentIncome', required: true, question: 'What is net investment income: interest, dividends, capital gains, rents and passive income, less related expenses?', why: 'The tax is on the lesser of this and the excess MAGI.' },
+      { field: 'filingStatus', required: false, question: 'What is the filing status?', why: 'Thresholds are $250,000 joint, $200,000 single and $125,000 separate.' }
+    ],
+    suggest: (result) => (result.netInvestmentIncomeTax > 0
+      ? [
+          step('planning capital-losses', 'Harvested losses reduce net investment income, and so this tax.'),
+          check('Check whether any income is non-passive or excluded', 'Active business income and qualified-plan distributions are not net investment income.')
+        ]
+      : [check(`MAGI is $${Math.max(0, result.threshold - result.magi).toLocaleString('en-US')} below the threshold; flag it before realizing large gains`, 'A single large sale can push MAGI over the line.')])
+  },
+
+  'portfolio cost-basis': {
+    summary: 'Cost basis and holding period for a sale, by FIFO, specific identification or average cost.',
+    typicalRequests: ['what is the basis on this sale', 'which lots should we sell', 'is this gain short or long term'],
+    inputs: [
+      { field: 'lots', required: true, question: 'Which lots are held: quantity, price paid and purchase date for each?', why: 'Basis and holding period come from the lots actually sold.' },
+      { field: 'sale', required: true, question: 'How many shares are being sold, on what date, and at what price?', why: 'The sale date sets each lot’s holding period.' },
+      { field: 'method', required: false, question: 'Which method applies: FIFO, specific identification, or average cost?', why: 'It changes both the basis and the short/long-term split.' }
+    ],
+    suggest: (result) => {
+      const next = [];
+      if (result.method === 'FIFO' && result.dispositions.length > 1) {
+        next.push(check('Compare against specific identification of the highest-basis lots', 'FIFO sells the oldest shares first, which often realizes the largest gain.'));
+      }
+      if ((result.shortTermGainOrLoss ?? 0) > 0) {
+        next.push(check('Consider whether the short-term lots can wait until they turn long-term', 'Short-term gains are taxed at ordinary income rates.'));
+      }
+      next.push(step('planning capital-losses', 'Net the realized result against the year’s other transactions.'));
+      return next;
+    }
+  },
+
+  'portfolio twr': {
+    summary: 'Time-weighted return, which removes the effect of contributions and withdrawals.',
+    typicalRequests: ['how did the manager perform', 'time-weighted return', 'performance excluding deposits'],
+    inputs: [
+      { field: 'valuations', required: true, question: 'What was the portfolio worth at the start, at each contribution or withdrawal, and at the end?', why: 'A valuation is needed at every external cash flow.' }
+    ],
+    suggest: () => [
+      step('portfolio irr', 'Money-weighted return shows the client’s own experience, including the timing of their deposits.'),
+      step('compliance performance-ad', 'If this goes into marketing material, check the Marketing Rule performance provisions first.')
+    ]
+  },
+
+  'portfolio irr': {
+    summary: 'Money-weighted return (XIRR) from dated contributions, distributions and ending value.',
+    typicalRequests: ['what is the IRR on this fund', 'money-weighted return', 'what did the client actually earn'],
+    inputs: [
+      { field: 'cashFlows', required: true, question: 'What were the dated contributions (negative) and distributions (positive), plus the current value as a final flow?', why: 'The rate is solved from the timing and size of each flow.' }
+    ],
+    suggest: () => [
+      step('portfolio twr', 'Compare with time-weighted return to separate manager results from the effect of flow timing.'),
+      step('uhnw pe-metrics', 'For a private fund, pair IRR with TVPI and DPI; IRR alone flatters early distributions.')
+    ]
+  },
+
+  'quant sharpe-stats': {
+    summary: 'How far a Sharpe ratio can be trusted: standard error, and probabilistic and deflated Sharpe ratios.',
+    typicalRequests: ['is this Sharpe ratio significant', 'could this backtest be luck', 'deflated Sharpe ratio'],
+    inputs: [
+      { field: 'returns', required: true, question: 'What are the periodic returns, and how many periods make a year?', why: 'Every statistic is estimated from the return series.' },
+      { field: 'trials', required: false, question: 'How many strategy variants were tried before settling on this one?', why: 'The more variants tried, the higher a Sharpe ratio must be to mean anything.' }
+    ],
+    suggest: (result) => {
+      const next = [];
+      if (result.deflated === null) {
+        next.push(check('Find out how many variants were tested, then re-run with trials and sharpeVariance', 'Choosing the best of many backtests inflates its Sharpe ratio; only the deflated figure corrects for that.'));
+      }
+      if (result.probabilisticSharpeRatio < 0.95) {
+        next.push(check('Treat the Sharpe ratio as not distinguishable from the benchmark', `There is a ${(100 - result.probabilisticSharpeRatio * 100).toFixed(1)}% probability the true value is at or below it.`));
+      }
+      next.push(check('Check the returns for serial correlation before relying on the standard error', 'Smoothed or illiquid returns make it look smaller than it is.'));
+      return next;
+    }
+  },
+
+  'execution identifier': {
+    summary: 'Validates ISIN, CUSIP, FIGI and LEI check digits, and MIC and CFI formats.',
+    typicalRequests: ['is this ISIN valid', 'check this CUSIP', 'validate the LEI'],
+    inputs: [
+      { field: 'id', required: true, question: 'Which identifier should be checked?', why: 'The check digit is computed from the other characters.' },
+      { field: 'type', required: false, question: 'Is it an ISIN, CUSIP, FIGI, LEI, MIC or CFI code?', why: 'Some strings match more than one format.' }
+    ],
+    suggest: (result) => (result.valid
+      ? [check(result.checkDigitVerified ? 'Confirm the identifier maps to the intended instrument in the security master' : 'Confirm the code against the official ISO list', 'A valid code is well-formed; it does not prove it is the right instrument.')]
+      : [check('Ask for the identifier again from the source document', result.reason ?? 'The identifier failed validation.')])
+  },
+
+  'execution settlement-date': {
+    summary: 'T+1 settlement date under SEC Rule 15c6-1, skipping weekends and supplied holidays.',
+    typicalRequests: ['when does this trade settle', 'settlement date', 'when is the cash available'],
+    inputs: [
+      { field: 'tradeDate', required: true, question: 'What is the trade date?', why: 'Settlement counts business days from it.' },
+      { field: 'holidays', required: false, question: 'Which market holidays fall in the next few days?', why: 'No holiday calendar is built in.' }
+    ],
+    questions: (result) => (result.note?.startsWith('No market holidays')
+      ? [{ field: 'holidays', question: `Are there any market holidays between ${result.tradeDate} and ${result.settlementDate}?`, why: 'No holiday calendar is built in, so only weekends were skipped.' }]
+      : []),
+    suggest: (result) => [
+      ...(result.tradeDateIsBusinessDay ? [] : [check('Confirm the trade date', `${result.tradeDate} is not a business day.`)]),
+      check('Confirm the settlement cycle for the instrument', 'Some transactions, such as certain new issues and cross-border trades, do not settle T+1.')
+    ]
+  },
+
+  'onboarding gaps': {
+    summary: 'What an account application is missing: blocking items, items needed before recommendations, and recommended items.',
+    typicalRequests: ['what do we still need to open this account', 'is this application complete', 'KYC gaps'],
+    inputs: [
+      { field: 'application', required: true, question: 'What account type is being opened, and what has been collected so far?', why: 'Required records differ for individual, joint, IRA, trust and entity accounts.' }
+    ],
+    questions: (result) => [...result.blocking, ...result.beforeRecommendations].slice(0, 8).map(gap => ({
+      field: gap.field,
+      question: `Can you provide the ${gap.requirement[0].toLowerCase()}${gap.requirement.slice(1)}?`,
+      why: `Required under ${gap.rule}.`
+    })),
+    suggest: (result) => {
+      if (!result.readyToOpen) return [check('Collect the blocking items before opening the account', `${result.counts.blocking} item(s) prevent the account from opening.`)];
+      const next = [];
+      if (!result.readyForRecommendations) next.push(check('Complete the investment profile before making any recommendation', 'FINRA 2090 and 2111 require it first.'));
+      if (result.counts.recommended > 0) next.push(check('Ask for the recommended items, and record it if the customer declines', 'A trusted contact must be requested with reasonable effort, though the customer may decline.'));
+      next.push(step('onboarding validate-cip', 'Record the OFAC screening result before funding.'));
+      return next;
+    }
+  },
+
+  'compliance suitability': {
+    summary: 'Customer-specific and quantitative suitability checks under FINRA 2111, with the profile gaps that prevent a view.',
+    typicalRequests: ['is this suitable for the client', 'Reg BI care check', 'is this account being over-traded'],
+    inputs: [
+      { field: 'profile', required: true, question: 'What is the customer’s investment profile: age, other investments, financial situation, tax status, objectives, experience, time horizon, liquidity needs and risk tolerance?', why: 'FINRA 2111 names these nine factors.' },
+      { field: 'recommendation', required: true, question: 'What is being recommended: risk level, minimum holding period, liquidity and amount?', why: 'Each is compared against the profile.' }
+    ],
+    questions: (result) => result.missingProfileFactors.map(factor => ({
+      field: `profile.${factor}`,
+      question: `What is the customer’s ${factor.replace(/([A-Z])/g, ' $1').toLowerCase()}?`,
+      why: 'FINRA 2111(a) lists it as part of the investment profile.'
+    })),
+    suggest: (result) => {
+      const next = [];
+      if (result.flags.length > 0) next.push(check('Document the rationale for each flag, or reconsider the recommendation', 'A recommendation that conflicts with the profile needs a written basis.'));
+      if (result.metrics.annualTurnover === undefined) next.push(check('Supply account activity to check quantitative suitability', 'Turnover and cost-equity cannot be assessed without it.'));
+      next.push(check('Confirm reasonable-basis suitability: that the product is understood and suits at least some investors', 'That obligation cannot be checked from these inputs.'));
+      return next;
+    }
+  },
+
+  'compliance performance-ad': {
+    summary: 'Checks advertised performance against the SEC Marketing Rule’s performance provisions, 206(4)-1(d).',
+    typicalRequests: ['can we show this performance', 'marketing rule check', 'is this factsheet compliant'],
+    inputs: [
+      { field: 'ad', required: true, question: 'What does the advertisement show: gross and net performance, which periods ending when, and any related, extracted or hypothetical performance?', why: 'Each triggers different conditions.' }
+    ],
+    questions: (result) => result.unanswered.map(({ field, question }) => ({ field, question, why: 'The answer decides whether a Marketing Rule condition applies.' })),
+    suggest: (result) => [
+      ...(result.violations.length > 0 ? [check('Fix each violation and re-run the check', `${result.violations.length} performance provision(s) are not met.`)] : []),
+      step('compliance scan', 'Screen the surrounding wording for promissory language and missing disclosures.'),
+      check('Route to the chief compliance officer for review', 'Testimonials, endorsements, ratings and the general prohibitions are not covered.')
+    ]
+  },
+
+  'research dcf': {
+    summary: 'Discounted cash flow valuation with a terminal value and a sensitivity grid.',
+    typicalRequests: ['what is this business worth', 'build a DCF', 'intrinsic value'],
+    inputs: [
+      { field: 'cashFlows', required: true, question: 'What are the forecast free cash flows for each year?', why: 'The valuation discounts each year of the forecast.' },
+      { field: 'discountRate', required: true, question: 'What discount rate and long-run growth rate should be used?', why: 'Together they drive the terminal value, which is usually most of the answer.' }
+    ],
+    suggest: (result) => [
+      ...(result.terminalValueShareOfEnterprisePct > 75 ? [check('Stress the terminal assumptions', `${result.terminalValueShareOfEnterprisePct}% of the value comes from the terminal value.`)] : []),
+      step('research tear-sheet', 'Cross-check the result against current trading multiples.')
+    ]
+  },
+
+  'fundops reconcile': {
+    summary: 'Reconciles book positions against the custodian, listing quantity, value and missing-position breaks.',
+    typicalRequests: ['reconcile against the custodian', 'why do the positions not match', 'ledger breaks'],
+    inputs: [
+      { field: 'book', required: true, question: 'What are the book and custodian positions: account, security, quantity and market value?', why: 'Breaks are found by matching account and security.' }
+    ],
+    suggest: (result) => (result.reconciled
+      ? [check('Sign off the reconciliation for the period', 'Every position matched within tolerance.')]
+      : [
+          check('Investigate quantity breaks first, then missing positions, then pricing differences', 'Quantity breaks usually mean an unbooked trade or corporate action.'),
+          check('Record the cause and resolution of each break before the close', `${result.breaks.length} break(s) found.`)
+        ])
+  },
+
+  'fundops nav-tieout': {
+    summary: 'Recomputes NAV from assets and liabilities, and flags variances, level 3 exposure and stale prices.',
+    typicalRequests: ['does the NAV tie out', 'review this valuation', 'check the NAV per unit'],
+    inputs: [
+      { field: 'fund', required: true, question: 'What are the assets and liabilities, units outstanding and reported NAV?', why: 'NAV is recomputed from them.' }
+    ],
+    questions: (result) => (result.levelThree.count > 0 && result.stalePrices.length === 0
+      ? [{ field: 'priceDate', question: 'When was each level 3 holding last valued, and what is the valuation date?', why: 'Stale marks on hard-to-value assets are the main valuation-review risk.' }]
+      : []),
+    suggest: (result) => [
+      ...(result.tiesOut ? [] : [check('Resolve each exception with the administrator before striking NAV', `${result.exceptions.length} exception(s) found.`)]),
+      check('Review the valuation support for level 3 holdings', result.levelThree.count > 0 ? `${result.levelThree.shareOfNavPct}% of NAV is level 3.` : 'No level 3 holdings were flagged.'),
+      step('fundops lp-statement', 'Check that investor capital statements roll forward to the struck NAV.')
+    ]
+  },
+
+  'fundops lp-statement': {
+    summary: 'Checks that an LP capital account statement rolls forward, with commitment and fee checks.',
+    typicalRequests: ['does this capital statement tie', 'audit the LP statement', 'check my capital account'],
+    inputs: [
+      { field: 'statement', required: true, question: 'What are the beginning balance, contributions, distributions, income, gains, fees and ending balance?', why: 'The roll-forward needs every line.' }
+    ],
+    suggest: (result) => (result.passed
+      ? [check('File the statement as reviewed', 'It rolls forward within tolerance.')]
+      : [check('Query the differences with the fund administrator', result.exceptions[0] ?? 'The statement did not pass.')])
+  },
+
+  'fundops close-status': {
+    summary: 'Month-end close status: progress, overdue and blocked tasks, and what can start now.',
+    typicalRequests: ['where are we on the close', 'what is overdue for month end', 'what can we start next'],
+    inputs: [
+      { field: 'tasks', required: true, question: 'What are the close tasks, with owner, due date, status and dependencies?', why: 'Progress and readiness come from the task list.' },
+      { field: 'asOf', required: true, question: 'What date should status be measured at?', why: 'Overdue depends on it.' }
+    ],
+    suggest: (result) => {
+      if (result.closeComplete) return [check('Lock the period', 'Every close task is done.')];
+      const next = [];
+      if (result.overdue.length > 0) next.push(check(`Chase the ${result.overdue.length} overdue task(s) with their owners`, result.overdue.map(t => t.name).join(', ')));
+      if (result.readyToStart.length > 0) next.push(check(`Start ${result.readyToStart.map(t => t.name).join(', ')}`, 'All of their dependencies are done.'));
+      if (result.blocked.length > 0) next.push(check('Escalate the blocked tasks', result.blocked.map(t => t.name).join(', ')));
+      if (next.length === 0) next.push(check('Keep the in-progress tasks moving', 'Nothing is overdue or blocked.'));
       return next;
     }
   }

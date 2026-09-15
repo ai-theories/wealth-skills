@@ -3,7 +3,106 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Wealth Skills Portal | UHNW Wealth Planning & AI Playground</title>
+  <title>Wealth Skills: Open-Source AI Tools for US Wealth Management</title>
+  <meta name="description" content="Free, open-source AI tools and calculators for US wealth management: Roth headroom, RMDs, capital losses, NIIT, TWR and IRR, VaR, suitability and NAV tie-outs.">
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+  <link rel="canonical" href="https://ai-theories.github.io/wealth-skills/">
+  <meta name="theme-color" content="#0a0d14">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23f59e0b'/%3E%3Ctext x='32' y='45' font-family='Arial' font-weight='700' font-size='38' text-anchor='middle' fill='%23000'%3EW%3C/text%3E%3C/svg%3E">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Wealth Skills">
+  <meta property="og:title" content="Wealth Skills: Open-Source AI Tools for US Wealth Management">
+  <meta property="og:description" content="Calculators, a CLI and MCP servers that give AI agents tax, portfolio, compliance and fund-operations tools, with human review built in.">
+  <meta property="og:url" content="https://ai-theories.github.io/wealth-skills/">
+  <meta property="og:image" content="https://ai-theories.github.io/wealth-skills/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Wealth Skills: open-source AI tools for US wealth management">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Wealth Skills: Open-Source AI Tools for US Wealth Management">
+  <meta name="twitter:description" content="Calculators, a CLI and MCP servers for tax, portfolio, compliance and fund operations, with human review built in.">
+  <meta name="twitter:image" content="https://ai-theories.github.io/wealth-skills/og-image.png">
+  <link rel="alternate" type="text/plain" href="https://ai-theories.github.io/wealth-skills/llms.txt" title="LLM-readable summary">
+  <script type="application/ld+json" id="structured-data">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "SoftwareApplication",
+        "@id": "https://ai-theories.github.io/wealth-skills/#software",
+        "name": "Wealth Skills",
+        "alternateName": "wealth-skills",
+        "description": "Open-source AI skill packs, calculation engines, a CLI and Model Context Protocol (MCP) servers for US wealth management: financial planning and tax, portfolio risk and performance, trade preparation, client onboarding, compliance, research, UHNW planning and fund operations.",
+        "url": "https://ai-theories.github.io/wealth-skills/",
+        "codeRepository": "https://github.com/ai-theories/wealth-skills",
+        "applicationCategory": "FinanceApplication",
+        "applicationSubCategory": "Developer tools for AI agents",
+        "operatingSystem": "Any (Node.js 20.11 or later; runs in the browser)",
+        "softwareVersion": "0.1.0",
+        "license": "https://opensource.org/licenses/MIT",
+        "isAccessibleForFree": true,
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+        "featureList": [
+          "Roth conversion bracket headroom for tax year 2026",
+          "Required minimum distributions from the IRS Uniform Lifetime Table",
+          "Capital-loss netting and carryover following the Schedule D worksheet",
+          "Net investment income tax under IRC section 1411",
+          "Cost basis by FIFO, specific identification and average cost",
+          "Time-weighted and money-weighted (XIRR) returns",
+          "Probabilistic and deflated Sharpe ratio",
+          "Parametric Value at Risk and expected shortfall",
+          "Tax-loss harvesting with a 30-day wash-sale look-back",
+          "FINRA Rule 2111 suitability and SEC Marketing Rule performance checks",
+          "Investment adviser registration lookups in SEC IAPD compilation files",
+          "ISIN, CUSIP, FIGI and LEI check-digit validation and T+1 settlement dates",
+          "FIX 4.4 New Order Single payloads",
+          "Fund NAV tie-out, position reconciliation and LP capital statement checks"
+        ]
+      },
+      {
+        "@type": "FAQPage",
+        "@id": "https://ai-theories.github.io/wealth-skills/#faq",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What is Wealth Skills?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Wealth Skills is an open-source library that gives AI agents such as Claude Code, Codex and Cursor the workflow knowledge and calculation tools for US wealth management. It has skill packs that tell an agent when a workflow applies, zero-dependency calculation engines, a CLI, MCP servers and this browser dashboard." }
+          },
+          {
+            "@type": "Question",
+            "name": "Does Wealth Skills place trades or give investment advice?",
+            "acceptedAnswer": { "@type": "Answer", "text": "No. It prepares analysis and order payloads for a licensed professional to review. It never submits orders or moves money, and results that affect a client carry requiresHumanApproval." }
+          },
+          {
+            "@type": "Question",
+            "name": "How do I connect Wealth Skills to Claude or another MCP client?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Clone the repository and register mcp-servers/universal-wealth-server/index.js as a stdio MCP server with node. It exposes 35 tools. A second server, mcp-servers/sec-iapd-lookup/index.js, looks up investment adviser registrations in SEC IAPD compilation files." }
+          },
+          {
+            "@type": "Question",
+            "name": "How much capital loss can be deducted in a year?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Under IRC section 1211(b), net capital losses offset up to $3,000 of ordinary income a year, or $1,500 when married filing separately. The rest carries forward under section 1212(b) and keeps its short- or long-term character. The capital losses calculator follows the Schedule D Capital Loss Carryover Worksheet." }
+          },
+          {
+            "@type": "Question",
+            "name": "When does the 3.8% net investment income tax apply?",
+            "acceptedAnswer": { "@type": "Answer", "text": "It applies to the lesser of net investment income or modified adjusted gross income above $250,000 for married filing jointly or qualifying surviving spouse, $125,000 for married filing separately, and $200,000 for single or head of household filers. The thresholds are not indexed for inflation." }
+          },
+          {
+            "@type": "Question",
+            "name": "What is the difference between time-weighted and money-weighted return?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Time-weighted return links sub-period returns between cash flows, so it measures the manager independent of when money was added or withdrawn. Money-weighted return (XIRR) is the rate that sets the present value of the dated cash flows to zero, so it reflects the investor's own timing." }
+          },
+          {
+            "@type": "Question",
+            "name": "Does Wealth Skills query FINRA BrokerCheck?",
+            "acceptedAnswer": { "@type": "Answer", "text": "No. FINRA's terms of use prohibit automated access and use with AI tools. Investment adviser registrations are looked up in the daily compilation files the SEC publishes at adviserinfo.sec.gov/compilation; broker-dealer registrations should be checked by hand on BrokerCheck." }
+          }
+        ]
+      }
+    ]
+  }
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
@@ -229,12 +328,22 @@
       font-size: 14px;
     }
     .module-warning[hidden] { display: none; }
+    .pair { display: flex; gap: 10px; }
+    a { color: var(--accent-blue); }
+    .intro, .faq { max-width: 980px; margin: 0 0 28px; }
+    .intro h2, .faq h2 { font-family: 'Outfit', sans-serif; font-size: 20px; margin-bottom: 10px; }
+    .intro p, .faq p { color: var(--text-muted); line-height: 1.6; font-size: 14px; }
+    .faq { margin-top: 40px; }
+    .faq details { background: var(--bg-card); border: 1px solid var(--border-card); border-radius: 12px; padding: 14px 18px; margin-bottom: 10px; }
+    .faq summary { cursor: pointer; font-weight: 600; }
+    .faq details p { margin-top: 10px; }
+    .site-footer { margin-top: 32px; padding-top: 20px; border-top: 1px solid var(--border-card); color: var(--text-muted); font-size: 12px; }
     .module-warning code { color: #fff; }
   </style>
 </head>
 <body>
 
-  <div id="module-warning" class="module-warning">
+  <div id="module-warning" class="module-warning" hidden>
     The calculators load the library engines as ES modules, which browsers block on <code>file://</code>.
     Run <code>npm run dashboard</code> and open the printed URL.
   </div>
@@ -243,24 +352,35 @@
     <div class="brand">
       <div class="brand-logo">W</div>
       <div class="brand-title">
-        <h1>Wealth Skills Portal</h1>
-        <p>Ultra-High-Net-Worth Advisory & AI Engine Playground</p>
+        <h1>Wealth Skills</h1>
+        <p>Open-source AI tools for US wealth management</p>
       </div>
     </div>
     <div class="badge-bar">
       <div class="badge">● Calculations run on src/engines</div>
-      <div class="badge" style="color: var(--accent-gold);">● UHNW Family Office Enabled</div>
+      <a class="badge" style="color: var(--accent-gold); text-decoration: none;" href="https://github.com/ai-theories/wealth-skills">★ Source on GitHub</a>
     </div>
   </header>
 
+  <section class="intro" aria-labelledby="intro-title">
+    <h2 id="intro-title">Calculators an AI agent can call, and you can try here</h2>
+    <p>Wealth Skills gives AI agents such as Claude Code, Codex and Cursor the tools to help advisors with tax and retirement planning, portfolio risk and performance, trade preparation, onboarding, compliance and fund operations. Every figure on this page comes from the same zero-dependency JavaScript engines the <a href="https://github.com/ai-theories/wealth-skills#cli">CLI</a> and <a href="https://github.com/ai-theories/wealth-skills#mcp-servers">MCP servers</a> run. Nothing leaves your browser, nothing is traded, and every result is for a licensed professional to review.</p>
+  </section>
+
+  <main>
   <!-- Navigation Tabs -->
-  <div class="tabs-nav">
+  <nav class="tabs-nav" aria-label="Calculators">
     <button class="tab-btn active" data-tab="tab-planning">Tax & Retirement Planning</button>
     <button class="tab-btn" data-tab="tab-portfolio">Portfolio Drift & Risk (VaR)</button>
     <button class="tab-btn" data-tab="tab-quant">Quantitative Backtesting</button>
     <button class="tab-btn" data-tab="tab-uhnw">UHNW Concentrated Collar & PE</button>
     <button class="tab-btn" data-tab="tab-fix">Institutional FIX Protocol</button>
-  </div>
+    <button class="tab-btn" data-tab="tab-tax">Capital Losses & NIIT</button>
+    <button class="tab-btn" data-tab="tab-performance">TWR vs IRR</button>
+    <button class="tab-btn" data-tab="tab-suitability">FINRA 2111 Suitability</button>
+    <button class="tab-btn" data-tab="tab-markets">Identifiers & T+1</button>
+    <button class="tab-btn" data-tab="tab-fundops">Fund NAV Tie-Out</button>
+  </nav>
 
   <!-- TAB 1: Tax & Retirement Planning -->
   <div id="tab-planning" class="tab-content active">
@@ -418,16 +538,216 @@
     </div>
   </div>
 
+
+  <!-- TAB 6: Capital losses and NIIT -->
+  <section id="tab-tax" class="tab-content" aria-labelledby="tax-title">
+    <div class="grid-2">
+      <div class="card">
+        <h2 id="tax-title">Capital-Loss Carryover & Net Investment Income Tax</h2>
+        <div class="form-group">
+          <label for="tax-status">Filing Status</label>
+          <select id="tax-status" class="form-control">
+            <option value="MFJ">Married Filing Jointly</option><option value="SINGLE">Single</option><option value="HOH">Head of Household</option>
+            <option value="MFS">Married Filing Separately</option><option value="QSS">Qualifying Surviving Spouse</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Short-Term Gains &amp; Losses ($, losses as positive amounts)</label>
+          <div class="pair"><input type="number" id="tax-stg" class="form-control" value="0" min="0" aria-label="Short-term gains"><input type="number" id="tax-stl" class="form-control" value="5000" min="0" aria-label="Short-term losses"></div>
+        </div>
+        <div class="form-group">
+          <label>Long-Term Gains &amp; Losses ($)</label>
+          <div class="pair"><input type="number" id="tax-ltg" class="form-control" value="3000" min="0" aria-label="Long-term gains"><input type="number" id="tax-ltl" class="form-control" value="12000" min="0" aria-label="Long-term losses"></div>
+        </div>
+        <div class="form-group">
+          <label>MAGI &amp; Net Investment Income ($)</label>
+          <div class="pair"><input type="number" id="tax-magi" class="form-control" value="320000" min="0" aria-label="Modified adjusted gross income"><input type="number" id="tax-nii" class="form-control" value="95000" min="0" aria-label="Net investment income"></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Schedule D Netting & IRC §1411 Output</h2>
+        <div id="tax-output" class="result-box" aria-live="polite">Calculating...</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 7: Performance -->
+  <section id="tab-performance" class="tab-content" aria-labelledby="perf-title">
+    <div class="grid-2">
+      <div class="card">
+        <h2 id="perf-title">Time-Weighted vs Money-Weighted Return</h2>
+        <div class="form-group">
+          <label for="perf-start">Value on January 1 ($)</label>
+          <input type="number" id="perf-start" class="form-control" value="1000000" min="1">
+        </div>
+        <div class="form-group">
+          <label>Value on June 30, Before the Deposit &amp; Deposit ($)</label>
+          <div class="pair"><input type="number" id="perf-mid" class="form-control" value="850000" min="0" aria-label="Mid-year value before deposit"><input type="number" id="perf-flow" class="form-control" value="500000" aria-label="Mid-year deposit"></div>
+        </div>
+        <div class="form-group">
+          <label for="perf-end">Value on December 31 ($)</label>
+          <input type="number" id="perf-end" class="form-control" value="1500000" min="0">
+        </div>
+      </div>
+      <div class="card">
+        <h2>TWR (Manager) & XIRR (Client) Output</h2>
+        <div id="performance-output" class="result-box" aria-live="polite">Calculating...</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 8: Suitability -->
+  <section id="tab-suitability" class="tab-content" aria-labelledby="suit-title">
+    <div class="grid-2">
+      <div class="card">
+        <h2 id="suit-title">FINRA Rule 2111 Suitability Check</h2>
+        <div class="form-group">
+          <label>Customer Risk Tolerance &amp; Liquidity Needs</label>
+          <div class="pair">
+            <select id="suit-risk" class="form-control" aria-label="Risk tolerance"><option value="conservative">Conservative</option><option value="moderately_conservative">Moderately conservative</option><option value="moderate" selected>Moderate</option><option value="moderately_aggressive">Moderately aggressive</option><option value="aggressive">Aggressive</option></select>
+            <select id="suit-liquidity" class="form-control" aria-label="Liquidity needs"><option value="high">High</option><option value="medium" selected>Medium</option><option value="low">Low</option></select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Customer Time Horizon (years) &amp; Investable Assets ($)</label>
+          <div class="pair"><input type="number" id="suit-horizon" class="form-control" value="3" min="0" aria-label="Time horizon in years"><input type="number" id="suit-assets" class="form-control" value="400000" min="1" aria-label="Investable assets"></div>
+        </div>
+        <div class="form-group">
+          <label>Product Risk (1-5) &amp; Minimum Holding (years)</label>
+          <div class="pair"><input type="number" id="suit-prisk" class="form-control" value="4" min="1" max="5" aria-label="Product risk level"><input type="number" id="suit-phorizon" class="form-control" value="7" min="0" aria-label="Product minimum horizon"></div>
+        </div>
+        <div class="form-group">
+          <label>Product Liquidity &amp; Amount ($)</label>
+          <div class="pair">
+            <select id="suit-pliquidity" class="form-control" aria-label="Product liquidity"><option value="daily">Daily</option><option value="monthly">Monthly</option><option value="quarterly">Quarterly</option><option value="annual">Annual</option><option value="illiquid" selected>Illiquid</option></select>
+            <input type="number" id="suit-amount" class="form-control" value="150000" min="0" aria-label="Recommendation amount">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="suit-limit">Firm Concentration Limit (% of investable assets)</label>
+          <input type="number" id="suit-limit" class="form-control" value="10" min="0" max="100">
+        </div>
+      </div>
+      <div class="card">
+        <h2>Suitability Flags Output</h2>
+        <div id="suitability-output" class="result-box" aria-live="polite">Calculating...</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 9: Identifiers and settlement -->
+  <section id="tab-markets" class="tab-content" aria-labelledby="markets-title">
+    <div class="grid-2">
+      <div class="card">
+        <h2 id="markets-title">Security Identifier Check & T+1 Settlement Date</h2>
+        <div class="form-group">
+          <label for="mkt-id">ISIN, CUSIP, FIGI, LEI, MIC or CFI</label>
+          <input type="text" id="mkt-id" class="form-control" value="US0378331005" spellcheck="false">
+        </div>
+        <div class="form-group">
+          <label for="mkt-trade">Trade Date</label>
+          <input type="date" id="mkt-trade" class="form-control" value="2026-11-25">
+        </div>
+        <div class="form-group">
+          <label for="mkt-holidays">Market Holidays (comma-separated YYYY-MM-DD)</label>
+          <input type="text" id="mkt-holidays" class="form-control" value="2026-11-26, 2026-12-25">
+        </div>
+      </div>
+      <div class="card">
+        <h2>Check Digit & SEC Rule 15c6-1 Output</h2>
+        <div id="markets-output" class="result-box" aria-live="polite">Calculating...</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 10: Fund NAV tie-out -->
+  <section id="tab-fundops" class="tab-content" aria-labelledby="fund-title">
+    <div class="grid-2">
+      <div class="card">
+        <h2 id="fund-title">Fund NAV Tie-Out</h2>
+        <div class="form-group">
+          <label>Listed Assets &amp; Cash ($)</label>
+          <div class="pair"><input type="number" id="fund-listed" class="form-control" value="4740000" min="0" aria-label="Listed assets"><input type="number" id="fund-cash" class="form-control" value="260000" min="0" aria-label="Cash"></div>
+        </div>
+        <div class="form-group">
+          <label>Level 3 Holding ($) &amp; Its Last Price Date</label>
+          <div class="pair"><input type="number" id="fund-l3" class="form-control" value="500000" min="0" aria-label="Level 3 holding value"><input type="date" id="fund-l3-date" class="form-control" value="2026-06-30" aria-label="Level 3 price date"></div>
+        </div>
+        <div class="form-group">
+          <label>Liabilities ($) &amp; Units Outstanding</label>
+          <div class="pair"><input type="number" id="fund-liab" class="form-control" value="40000" min="0" aria-label="Liabilities"><input type="number" id="fund-units" class="form-control" value="50000" min="1" aria-label="Units outstanding"></div>
+        </div>
+        <div class="form-group">
+          <label>Administrator's Reported NAV ($) &amp; NAV Date</label>
+          <div class="pair"><input type="number" id="fund-reported" class="form-control" value="5460000" min="0" aria-label="Reported NAV"><input type="date" id="fund-asof" class="form-control" value="2026-09-30" aria-label="NAV date"></div>
+        </div>
+        <div class="form-group">
+          <label for="fund-maxage">Maximum Price Age (days)</label>
+          <input type="number" id="fund-maxage" class="form-control" value="45" min="1">
+        </div>
+      </div>
+      <div class="card">
+        <h2>NAV Tie-Out Exceptions Output</h2>
+        <div id="fundops-output" class="result-box" aria-live="polite">Calculating...</div>
+      </div>
+    </div>
+  </section>
+  </main>
+
+  <section class="faq" aria-labelledby="faq-title">
+    <h2 id="faq-title">Frequently asked questions</h2>
+    <details open>
+      <summary>What is Wealth Skills?</summary>
+      <p>An open-source library that gives AI agents such as Claude Code, Codex and Cursor the workflow knowledge and calculation tools for US wealth management. It has skill packs that tell an agent when a workflow applies, zero-dependency calculation engines, a CLI, MCP servers and this dashboard.</p>
+    </details>
+    <details>
+      <summary>Does Wealth Skills place trades or give investment advice?</summary>
+      <p>No. It prepares analysis and order payloads for a licensed professional to review. It never submits orders or moves money, and results that affect a client carry <code>requiresHumanApproval</code>.</p>
+    </details>
+    <details>
+      <summary>How do I connect Wealth Skills to Claude or another MCP client?</summary>
+      <p>Clone the repository and register <code>mcp-servers/universal-wealth-server/index.js</code> as a stdio MCP server with <code>node</code>. It exposes 35 tools. A second server, <code>mcp-servers/sec-iapd-lookup/index.js</code>, looks up investment adviser registrations in SEC IAPD compilation files. See the <a href="https://github.com/ai-theories/wealth-skills/blob/main/docs/AGENT_INTEGRATION.md">integration guide</a>.</p>
+    </details>
+    <details>
+      <summary>How much capital loss can be deducted in a year?</summary>
+      <p>Under IRC §1211(b), net capital losses offset up to $3,000 of ordinary income a year, or $1,500 when married filing separately. The rest carries forward under §1212(b) and keeps its short- or long-term character. The Capital Losses &amp; NIIT tab follows the Schedule D Capital Loss Carryover Worksheet.</p>
+    </details>
+    <details>
+      <summary>When does the 3.8% net investment income tax apply?</summary>
+      <p>To the lesser of net investment income or MAGI above $250,000 (married filing jointly or qualifying surviving spouse), $125,000 (married filing separately) or $200,000 (single or head of household). The thresholds are set by statute and not indexed for inflation.</p>
+    </details>
+    <details>
+      <summary>What is the difference between time-weighted and money-weighted return?</summary>
+      <p>Time-weighted return links the sub-period returns between cash flows, so it measures the manager regardless of when money came in or went out. Money-weighted return (XIRR) is the rate that sets the present value of the dated cash flows to zero, so it reflects the investor's own timing.</p>
+    </details>
+    <details>
+      <summary>Does Wealth Skills query FINRA BrokerCheck?</summary>
+      <p>No. FINRA's terms of use prohibit automated access and use with AI tools. Investment adviser registrations are looked up in the daily compilation files the SEC publishes at <a href="https://adviserinfo.sec.gov/compilation">adviserinfo.sec.gov/compilation</a>; broker-dealer registrations should be checked by hand on BrokerCheck.</p>
+    </details>
+  </section>
+
+  <footer class="site-footer">
+    <p>MIT licensed · v0.1.0 · Not investment, tax or legal advice. Results are for review by a licensed professional. · <a href="https://github.com/ai-theories/wealth-skills">GitHub</a> · <a href="llms.txt">llms.txt</a></p>
+  </footer>
+
+  <script>
+    // ES modules do not load from file://. Say so only there, so crawlers and served pages never show it.
+    if (location.protocol === 'file:') document.getElementById('module-warning').hidden = false;
+  </script>
   <script type="module">
     import { calculateTaxBracketHeadroom, calculateRMD } from './src/engines/planning.js';
     import { monitorPortfolioDrift, calculatePortfolioVar } from './src/engines/portfolio.js';
     import { backtestPortfolio } from './src/engines/quant.js';
     import { calculateCollarStrategy } from './src/engines/uhnw.js';
     import { buildFixOrderPayload } from './src/engines/fix.js';
+    import { netCapitalGainsAndLosses, calculateNetInvestmentIncomeTax } from './src/engines/tax.js';
+    import { calculateTimeWeightedReturn, calculateMoneyWeightedReturn } from './src/engines/performance.js';
+    import { checkSuitability } from './src/engines/compliance.js';
+    import { validateSecurityIdentifier, calculateSettlementDate } from './src/engines/markets.js';
+    import { tieOutNav } from './src/engines/fundops.js';
 
     // Every figure on this page comes from the library engines. Nothing is recomputed or hardcoded
     // here, so the dashboard cannot drift from the CLI and MCP tools.
-    document.getElementById('module-warning').hidden = true;
 
     const $ = (id) => document.getElementById(id);
     const money = (n) => '$' + Math.round(n).toLocaleString();
@@ -509,6 +829,63 @@
       }).fixMessageReadable.split(' | ').filter(Boolean).join('\n'));
     }
 
+    function updateTax() {
+      const filingStatus = $('tax-status').value;
+      render('tax-output', () => ({
+        capitalLosses: netCapitalGainsAndLosses({
+          shortTermGains: Number($('tax-stg').value), shortTermLosses: Number($('tax-stl').value),
+          longTermGains: Number($('tax-ltg').value), longTermLosses: Number($('tax-ltl').value), filingStatus
+        }),
+        netInvestmentIncomeTax: calculateNetInvestmentIncomeTax({ magi: Number($('tax-magi').value), netInvestmentIncome: Number($('tax-nii').value), filingStatus })
+      }));
+    }
+
+    function updatePerformance() {
+      const start = Number($('perf-start').value);
+      const mid = Number($('perf-mid').value);
+      const flow = Number($('perf-flow').value);
+      const end = Number($('perf-end').value);
+      render('performance-output', () => ({
+        timeWeighted: calculateTimeWeightedReturn([
+          { date: '2025-12-31', value: start }, { date: '2026-06-30', value: mid, cashFlow: flow }, { date: '2026-12-31', value: end }
+        ]),
+        moneyWeighted: calculateMoneyWeightedReturn([
+          { date: '2025-12-31', amount: -start }, { date: '2026-06-30', amount: -flow }, { date: '2026-12-31', amount: end }
+        ])
+      }));
+    }
+
+    function updateSuitability() {
+      render('suitability-output', () => checkSuitability(
+        { riskTolerance: $('suit-risk').value, liquidityNeeds: $('suit-liquidity').value, timeHorizonYears: Number($('suit-horizon').value), investableAssets: Number($('suit-assets').value) },
+        { riskLevel: Number($('suit-prisk').value), minimumHorizonYears: Number($('suit-phorizon').value), liquidity: $('suit-pliquidity').value, amount: Number($('suit-amount').value) },
+        { limits: { maxPositionPct: Number($('suit-limit').value) } }
+      ));
+    }
+
+    function updateMarkets() {
+      const holidays = $('mkt-holidays').value.split(',').map(d => d.trim()).filter(Boolean);
+      render('markets-output', () => ({
+        identifier: validateSecurityIdentifier($('mkt-id').value.trim()),
+        settlement: calculateSettlementDate($('mkt-trade').value, { holidays })
+      }));
+    }
+
+    function updateFundOps() {
+      render('fundops-output', () => tieOutNav({
+        assets: [
+          { name: 'Listed assets', value: Number($('fund-listed').value), priceDate: $('fund-asof').value },
+          { name: 'Level 3 holding', value: Number($('fund-l3').value), level: 3, priceDate: $('fund-l3-date').value },
+          { name: 'Cash', value: Number($('fund-cash').value) }
+        ],
+        liabilities: [{ name: 'Liabilities', value: Number($('fund-liab').value) }],
+        unitsOutstanding: Number($('fund-units').value),
+        reportedNav: Number($('fund-reported').value),
+        asOf: $('fund-asof').value,
+        maxPriceAgeDays: Number($('fund-maxage').value)
+      }));
+    }
+
     document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => switchTab(btn)));
 
     const bindings = [
@@ -521,6 +898,16 @@
       ['fix-custodian', 'change', updateFix], ['fix-side', 'change', updateFix], ['fix-sym', 'input', updateFix],
       ['fix-qty', 'input', updateFix], ['fix-price', 'input', updateFix]
     ];
+    const groups = [
+      [updateTax, ['tax-status', 'tax-stg', 'tax-stl', 'tax-ltg', 'tax-ltl', 'tax-magi', 'tax-nii']],
+      [updatePerformance, ['perf-start', 'perf-mid', 'perf-flow', 'perf-end']],
+      [updateSuitability, ['suit-risk', 'suit-liquidity', 'suit-horizon', 'suit-assets', 'suit-prisk', 'suit-phorizon', 'suit-pliquidity', 'suit-amount', 'suit-limit']],
+      [updateMarkets, ['mkt-id', 'mkt-trade', 'mkt-holidays']],
+      [updateFundOps, ['fund-listed', 'fund-cash', 'fund-l3', 'fund-l3-date', 'fund-liab', 'fund-units', 'fund-reported', 'fund-asof', 'fund-maxage']]
+    ];
+    for (const [handler, ids] of groups) {
+      for (const id of ids) bindings.push([id, $(id).tagName === 'SELECT' ? 'change' : 'input', handler]);
+    }
     for (const [id, eventName, handler] of bindings) $(id).addEventListener(eventName, handler);
 
     updatePlanning();
@@ -528,6 +915,15 @@
     updateQuant();
     updateUhnw();
     updateFix();
+    updateTax();
+    updatePerformance();
+    updateSuitability();
+    updateMarkets();
+    updateFundOps();
+
+    // Deep links: #tab-tax opens that calculator.
+    const linked = document.querySelector(`.tab-btn[data-tab="${location.hash.slice(1)}"]`);
+    if (linked) switchTab(linked);
   </script>
 </body>
 </html>

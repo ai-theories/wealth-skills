@@ -34,7 +34,7 @@ auditMetadata:
 
 The block contains only fields the system can actually populate. Do not add self-assessed values such as confidence scores, and never list a data source that was not used. In particular:
 
-- `lookup_registration` and `parseBrokerCheckRecord` answer from a fictitious fixture. Never present their results as BrokerCheck or IAPD data.
+- `lookup_adviser_registration` and `lookupAdviserRegistration` answer from an SEC IAPD compilation file. Always state the file date, treat a `stale` file as unreliable, never read a miss as proof that someone is unregistered, and never present the result as BrokerCheck data. BrokerCheck must not be queried automatically.
 - `validateCipIdentity` records an OFAC result; it does not perform the screen. The result must come from an actual sanctions screening source.
 - When a live FRED or SEC EDGAR fetch fails, the result contains `null` values. Report the data as unavailable rather than estimating it.
 

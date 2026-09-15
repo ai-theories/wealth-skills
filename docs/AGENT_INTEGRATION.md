@@ -27,7 +27,21 @@ Add the Node.js MCP servers to your `claude_desktop_config.json`, replacing the 
 }
 ```
 
-`finra-sec-lookup` is also available, but it serves a **fictitious two-record fixture** and is not connected to BrokerCheck or IAPD. Only register it for demos, never for an agent that answers real registration questions.
+The universal server exposes every CLI capability as an MCP tool (35 tools). Registration lookups run in a second server, `sec-iapd-lookup`, which reads an SEC IAPD compilation file you download from [adviserinfo.sec.gov/compilation](https://adviserinfo.sec.gov/compilation):
+
+```json
+{
+  "mcpServers": {
+    "sec-iapd-lookup": {
+      "command": "node",
+      "args": ["/absolute/path/to/wealth-skills/mcp-servers/sec-iapd-lookup/index.js"],
+      "env": { "WEALTH_SKILLS_IAPD_FEED": "/absolute/path/to/IA_FIRM_SEC_Feed_09_13_2026.xml.gz" }
+    }
+  }
+}
+```
+
+The files are refreshed daily, so schedule the download. The server does not query FINRA BrokerCheck, whose terms of use prohibit automated access.
 
 ---
 

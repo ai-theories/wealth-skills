@@ -1,7 +1,7 @@
 ---
 name: wealth-research
-description: Valuation ratios from supplied fundamentals, keyword risk-factor summaries of filing text, and live FRED and SEC EDGAR fetches, plus guidance for earnings and market research that the engines do not perform.
-catalog_ids: ["T034", "T035", "T036", "T037", "T038", "T039", "T040", "T041", "T052", "T053", "T054", "T055", "T056", "T057", "T058", "T059", "T060", "T061", "T092", "T093"]
+description: Valuation ratios from supplied fundamentals, DCF valuation with sensitivity, keyword risk-factor summaries of filing text, XBRL fact extraction, and live FRED and SEC EDGAR fetches, plus guidance for earnings and market research that the engines do not perform.
+catalog_ids: ["T034", "T035", "T036", "T037", "T038", "T039", "T052", "T053", "T054", "T055", "T056", "T057", "T058", "T059", "T060", "T061", "T092", "T093", "T094", "S020", "S021", "S022", "S023", "S024", "S025", "G017", "G031", "G032", "G033", "G034", "G035", "G036", "G037", "G038", "G039", "G040", "G042", "G043", "G044", "G045", "G046", "G047", "G048", "G049", "G056", "G057", "G059", "G060", "G063", "G064", "G065", "G066", "G067", "G070", "G071", "G072", "G073", "G074", "G075", "G076", "G077", "G078", "G079", "G080", "G097", "G098", "G099", "R039", "R040", "R056", "R057", "R058", "R059", "R060", "R061", "R062", "R063", "R064", "R065", "R066", "R067", "R068", "R069", "R070", "R071", "R072", "R073", "R074", "R075", "R076", "R077", "R078", "R079", "R080", "R081", "R082", "R083", "R084", "R085", "R086", "R087", "R088", "R089", "R090", "R093"]
 ---
 
 # Wealth Research & Market Intelligence (`wealth-research`)
@@ -28,6 +28,8 @@ Trigger this skill when the user asks to:
 | Keyword summary of Item 1A risk-factor text you supply | `parseEdgarFilingSummary` | library only |
 | Latest observation of a FRED series (live) | `fetchLiveFredSeries` | library only |
 | SEC EDGAR company facts (live; requires a declared User-Agent) | `fetchLiveEdgarCompanyFacts` | library only |
+| Latest value of an XBRL concept from company facts | `extractCompanyFact` | library only |
+| Discounted cash flow valuation with a sensitivity grid | `buildDcfValuation` | `research dcf` |
 
 ## Guidance Only (No Engine Support)
 
@@ -75,6 +77,25 @@ Typical requests this pack answers:
 - "What are the latest 10-year Treasury yields?"
 
 ---
+
+<!-- catalog:start -->
+## Catalog Coverage
+
+Generated from `catalog/catalog.json` by `npm run catalog`. See [CATALOG_CROSSWALK.md](../../CATALOG_CROSSWALK.md) for each item's name and what is and is not covered.
+
+This pack is assigned **105** catalog items; **13** are backed by engine code.
+
+| Tier | Items | IDs |
+|---|---:|---|
+| `partial-engine` | 13 | T037, T038, T055, T056, T057, T059, T060, T061, T092, T093, T094, S023, S024 |
+| `guidance` | 8 | T034, T035, T036, T039, T052, T053, T054, T058 |
+| `standard-reference` | 4 | S020, S021, S022, S025 |
+| `integration-reference` | 42 | G017, G031, G032, G033, G034, G035, G036, G037, G038, G039, G040, G042, G043, G044, G045, G046, G047, G048, G049, G056, G057, G059, G060, G063, G064, G065, G066, G067, G070, G071, G072, G073, G074, G075, G076, G077, G078, G079, G080, G097, G098, G099 |
+| `research-reference` | 38 | R039, R040, R056, R057, R058, R059, R060, R061, R062, R063, R064, R065, R066, R067, R068, R069, R070, R071, R072, R073, R074, R075, R076, R077, R078, R079, R080, R081, R082, R083, R084, R085, R086, R087, R088, R089, R090, R093 |
+
+---
+
+<!-- catalog:end -->
 
 ## Output Standard & Platform Formatting
 

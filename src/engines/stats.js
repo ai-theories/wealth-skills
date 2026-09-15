@@ -50,6 +50,14 @@ export function inverseNormalCdf(p) {
     ((((d0 * q + d1) * q + d2) * q + d3) * q + 1);
 }
 
+// Standard normal CDF via Abramowitz & Stegun 7.1.26 for erf (absolute error below 1.5e-7).
+export function normalCdf(x) {
+  const t = 1 / (1 + (0.3275911 * Math.abs(x)) / Math.SQRT2);
+  const poly = t * (0.254829592 + t * (-0.284496736 + t * (1.421413741 + t * (-1.453152027 + t * 1.061405429))));
+  const erf = 1 - poly * Math.exp(-(x * x) / 2);
+  return x >= 0 ? 0.5 * (1 + erf) : 0.5 * (1 - erf);
+}
+
 // Deterministic PRNG (mulberry32) for reproducible simulations and tests. Pass the result as `rng`.
 export function seededRandom(seed) {
   let state = seed >>> 0;

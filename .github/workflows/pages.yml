@@ -28,14 +28,10 @@ jobs:
       - name: Test
         run: npm test
 
-      # Publish only the dashboard and the browser-safe engine modules it imports, not the whole
-      # repository. .nojekyll serves the files as-is.
+      # Publish the dashboard, the engine modules it imports, and the search and answer-engine files
+      # (robots.txt, sitemap.xml, llms.txt), not the whole repository. See bin/build-site.js.
       - name: Assemble site
-        run: |
-          mkdir -p _site/src/engines
-          cp dashboard.html _site/index.html
-          cp src/engines/*.js _site/src/engines/
-          touch _site/.nojekyll
+        run: npm run site
 
       - uses: actions/upload-pages-artifact@v5
         with:

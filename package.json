@@ -1,7 +1,7 @@
 {
   "name": "@wealth-skills/core",
   "version": "0.1.0",
-  "description": "Enterprise AI skill library and Model Context Protocol tools for US Wealth Management.",
+  "description": "Open-source AI skill packs, calculation engines, CLI and MCP servers for US wealth management: tax, portfolio, compliance and fund operations.",
   "main": "src/index.js",
   "type": "module",
   "bin": {
@@ -11,15 +11,29 @@
     "test": "node --test --test-timeout=30000 tests/*.test.js",
     "proofs": "node bin/run-empirical-proofs.js",
     "test:live": "WEALTH_SKILLS_LIVE_TESTS=1 node --test --test-timeout=60000 tests/live.test.js",
-    "dashboard": "node bin/serve-dashboard.js"
+    "dashboard": "node bin/serve-dashboard.js",
+    "catalog": "node bin/build-catalog.js",
+    "catalog:check": "node bin/build-catalog.js --check",
+    "site": "node bin/build-site.js"
   },
   "keywords": [
     "wealth-management",
     "ai-agents",
     "mcp",
     "financial-planning",
-    "portfolio-rebalance"
+    "portfolio-rebalance",
+    "model-context-protocol",
+    "claude",
+    "finra",
+    "sec",
+    "tax-planning",
+    "fund-administration"
   ],
+  "homepage": "https://ai-theories.github.io/wealth-skills/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ai-theories/wealth-skills.git"
+  },
   "author": "WealthSkills AI",
   "license": "MIT",
   "engines": {

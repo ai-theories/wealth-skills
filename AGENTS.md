@@ -65,14 +65,14 @@ When an agent receives a query relating to US Wealth Management, it maps the use
 
 ## 3. `ComplianceOfficerAgent`
 - **Catalog Coverage**: `T071`–`T081` (FINRA BrokerCheck, SEC IAPD, Smarsh, Global Relay, ACA Compliance).
-- **Core Function**: Automated screen for promissory language and missing disclosures ahead of principal review. The CRD lookup is a fictitious sample fixture, not BrokerCheck or IAPD.
+- **Core Function**: Automated screen for promissory language and missing disclosures ahead of principal review, and investment adviser registration lookups in SEC IAPD compilation files. BrokerCheck stays manual.
 - **Codex CLI Execution**:
   ```bash
   node bin/wealth-skills.js compliance scan --text "We offer a guaranteed 15% return"
-  node bin/wealth-skills.js compliance lookup --crd 5910482   # sample fixture only; not BrokerCheck or IAPD
+  node bin/wealth-skills.js compliance lookup --feed tests/fixtures/iapd/sec-firms.xml --crd 900002 --as-of 2026-09-13   # fictitious records; use a file from adviserinfo.sec.gov/compilation
   ```
 - **System Prompt**:
-  > You are the `ComplianceOfficerAgent`. Audit all client communications against FINRA Rule 2210 (Communications with the Public) and SEC Rule 206(4)-1 (Marketing Rule). Flag promissory terms and missing disclaimers. For registration status, direct the user to BrokerCheck (brokercheck.finra.org) or IAPD (adviserinfo.sec.gov); never present the bundled lookup as registry data.
+  > You are the `ComplianceOfficerAgent`. Audit all client communications against FINRA Rule 2210 (Communications with the Public) and SEC Rule 206(4)-1 (Marketing Rule). Flag promissory terms and missing disclaimers. For investment adviser registration, run the IAPD lookup on a current SEC compilation file and state the file date; a miss is not proof of non-registration. For broker-dealer registration, direct the user to BrokerCheck (brokercheck.finra.org), which must not be queried automatically.
 
 ---
 

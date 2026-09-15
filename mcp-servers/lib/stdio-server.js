@@ -66,19 +66,30 @@ export function createMessageHandler({ name, version, tools }) {
 
     // A throwing tool must still produce a response, or the client waits on this id forever.
     // Execution failures are reported in-band with isError, per the MCP tools specification.
+    // Synchronous tools answer synchronously; a tool that returns a promise (file I/O) answers with one.
     try {
       const data = tool.handler(toolArgs);
-      const text = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
-      return resultResponse(id, { content: [{ type: 'text', text }] });
+      return data instanceof Promise
+        ? data.then(value => toolResult(id, value), err => toolError(id, err))
+        : toolResult(id, data);
     } catch (err) {
-      // An error naming a missing input carries the question to ask, so the model can come back to
-      // the user instead of guessing or giving up.
-      const text = err.needsInput
-        ? JSON.stringify({ error: err.message, needsInput: err.needsInput }, null, 2)
-        : `Error: ${err.message}`;
-      return resultResponse(id, { content: [{ type: 'text', text }], isError: true });
+      return toolError(id, err);
     }
   }
+}
+
+function toolResult(id, data) {
+  const text = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+  return resultResponse(id, { content: [{ type: 'text', text }] });
+}
+
+function toolError(id, err) {
+  // An error naming a missing input carries the question to ask, so the model can come back to
+  // the user instead of guessing or giving up.
+  const text = err.needsInput
+    ? JSON.stringify({ error: err.message, needsInput: err.needsInput }, null, 2)
+    : `Error: ${err.message}`;
+  return resultResponse(id, { content: [{ type: 'text', text }], isError: true });
 }
 
 export function startStdioServer(config) {
@@ -96,8 +107,11 @@ export function startStdioServer(config) {
       return;
     }
 
+    // Synchronous responses go out in order. An async tool answers when it finishes, possibly after
+    // later requests; JSON-RPC ids pair each response with its request.
     const response = handleMessage(message);
-    if (response) send(response);
+    if (response instanceof Promise) response.then(send);
+    else if (response) send(response);
   });
 }
 

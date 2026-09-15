@@ -1,7 +1,7 @@
 ---
 name: wealth-uhnw
 description: Concentrated-stock collar construction with constructive-sale review, and private equity multiple tracking (TVPI, DPI, RVPI), plus guidance for trust, philanthropic and exchange-fund planning that the engines do not model.
-catalog_ids: []  # the capability catalog has no UHNW-specific entries
+catalog_ids: ["T040", "T041", "S045", "S077", "S078", "S080", "G011", "G018", "G019"]
 ---
 
 # UHNW Family Office Skill Pack (`wealth-uhnw`)
@@ -16,11 +16,12 @@ This skill pack equips AI agents (**Claude Code, Devin, Cursor, Antigravity, Ope
 |---|---|---|
 | Collar strikes, net premium and effective floor/cap from supplied option quotes, zero-cost test, and IRC §1259 review flag | `calculateCollarStrategy` | `uhnw collar` |
 | Private equity multiples: TVPI/MOIC, DPI, RVPI and unfunded commitment | `calculatePeMetrics` | `uhnw pe-metrics` |
+| Private fund IRR from dated capital calls and distributions | `calculateMoneyWeightedReturn` | `portfolio irr` |
 
 ## Guidance Only (No Engine Support)
 
 - Covered-call overlays and exchange funds (§721 partnerships)
-- IRR and J-curve capital-call and distribution modelling
+- J-curve capital-call and distribution forecasting
 - Generation-skipping transfer planning with GRATs, IDGTs and CRTs
 - Donor-advised funds and private foundations
 
@@ -67,6 +68,23 @@ Typical requests this pack answers:
 - "How is this private equity fund performing?"
 
 ---
+
+<!-- catalog:start -->
+## Catalog Coverage
+
+Generated from `catalog/catalog.json` by `npm run catalog`. See [CATALOG_CROSSWALK.md](../../CATALOG_CROSSWALK.md) for each item's name and what is and is not covered.
+
+This pack is assigned **9** catalog items; **3** are backed by engine code.
+
+| Tier | Items | IDs |
+|---|---:|---|
+| `partial-engine` | 3 | T040, T041, S078 |
+| `standard-reference` | 3 | S045, S077, S080 |
+| `integration-reference` | 3 | G011, G018, G019 |
+
+---
+
+<!-- catalog:end -->
 
 ## Output Standard
 

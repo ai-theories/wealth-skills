@@ -1,7 +1,7 @@
 {
   "name": "universal-wealth-server",
   "version": "0.1.0",
-  "description": "MCP server exposing wealth-skills portfolio, quant, planning, and compliance calculations locally.",
+  "description": "MCP server exposing every wealth-skills calculation: planning, tax, portfolio, performance, execution, onboarding, compliance, research, CRM, UHNW and fund operations.",
   "main": "index.js",
   "type": "module",
   "scripts": {

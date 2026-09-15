@@ -120,3 +120,30 @@ test('CLI: Without A Seed, Simulations Still Vary', () => {
 
   assert.ok(runs.size > 1, 'unseeded runs should not be identical');
 });
+
+test('CLI: New Commands Run On Supplied Inputs', () => {
+  const losses = JSON.parse(run('planning', 'capital-losses', '--st-losses', '2000', '--lt-losses', '6000').stdout);
+  assert.equal(losses.longTermCarryover, 5000);
+
+  const id = JSON.parse(run('execution', 'identifier', '--id', 'HWUPKR0MPOU8FGXBT394').stdout);
+  assert.equal(id.type, 'LEI');
+  assert.equal(id.valid, true);
+
+  const settle = JSON.parse(run('execution', 'settlement-date', '--trade-date', '2026-09-04', '--holidays', '["2026-09-07"]').stdout);
+  assert.equal(settle.settlementDate, '2026-09-08');
+});
+
+test('CLI: Close Status With Supplied Tasks But No Date Asks For One', () => {
+  const tasks = JSON.stringify([{ id: 'a', name: 'A', status: 'done' }]);
+  const result = run('fundops', 'close-status', '--tasks', tasks);
+
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /^Ask: What date should the close status be measured at\?/m);
+});
+
+test('CLI: capabilities Now Lists The Fund Operations Tools', () => {
+  const tools = JSON.parse(run('capabilities').stdout).map(c => c.tool);
+  for (const tool of ['fundops reconcile', 'fundops nav-tieout', 'fundops lp-statement', 'fundops close-status']) {
+    assert.ok(tools.includes(tool), `${tool} missing`);
+  }
+});

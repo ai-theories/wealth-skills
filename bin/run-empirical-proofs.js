@@ -22,7 +22,8 @@ import { parseMeetingTranscript, buildCrmPayload } from '../src/engines/crm.js';
 import { generateCompanyTearSheet, parseEdgarFilingSummary } from '../src/engines/research.js';
 import { validatePreTradeCompliance } from '../src/engines/execution.js';
 import { validateCipIdentity, checkOnboardingStatus } from '../src/engines/onboarding.js';
-import { scanFinraRule2210, parseBrokerCheckRecord } from '../src/engines/compliance.js';
+import { scanFinraRule2210 } from '../src/engines/compliance.js';
+import { parseIapdFirmRecord } from '../src/engines/registration.js';
 import { renderAdaptiveUI } from '../src/engines/ui.js';
 import { seededRandom } from '../src/engines/stats.js';
 
@@ -109,11 +110,11 @@ export const USE_CASES = [
   {
     id: 'UC-107',
     tier: TIER_1,
-    name: 'Registration Lookup via CRD (Sample Fixture)',
-    run: () => parseBrokerCheckRecord('5910482'),
+    name: 'Adviser Registration Record in the SEC IAPD Compilation Schema',
+    run: () => parseIapdFirmRecord('<Firm><Info FirmCrdNb="900002" SECNb="802-900002" BusNm="SAMPLE RIDGE CAPITAL &amp; CO"/><Rgstn FirmType="ERA" St="ACTIVE" Dt="2022-01-10"/><Item11 Q11="Y"/><Item11C Q11C3="Y" Q11C5="N"/></Firm>'),
     checks: [
-      ['the fixture record is found', o => o.found === true],
-      ['the result is labelled as a non-authoritative, fictitious sample', o => o.dataSource === 'SAMPLE_FIXTURE' && o.isAuthoritative === false && o.record.fictitious === true]
+      ['an exempt reporting adviser is not counted as registered', o => o.exemptReportingAdviser === true && o.currentlyRegisteredWith.length === 0],
+      ['Item 11 answers are grouped into disclosure categories', o => o.disclosures.anyReported === true && o.disclosures.categories[0].questions.join() === 'Q11C3']
     ]
   },
 
