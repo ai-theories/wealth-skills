@@ -87,7 +87,7 @@ test('Site: Every Dashboard Import Is An Export Of The Engine It Names', async (
   assert.ok(imports.length >= 10);
   for (const [, names, file] of imports) {
     const module = await import(path.join(root, 'src', 'engines', file));
-    for (const name of names.split(',').map(n => n.trim())) assert.equal(typeof module[name], 'function', `${file} does not export ${name}`);
+    for (const name of names.split(',').map(n => n.trim())) assert.notEqual(module[name], undefined, `${file} does not export ${name}`);
     assert.doesNotMatch(fs.readFileSync(path.join(root, 'src', 'engines', file), 'utf8'), /^import .* from 'node:/m, `${file} imports a Node built-in and cannot run in the browser`);
   }
 });
@@ -136,4 +136,35 @@ test('Site: The Search Phrases People Use Appear In The Title, Description And V
     assert.ok(visible.includes(phrase), `visible page text lacks "${phrase}"`);
   }
   assert.match(read('llms.txt'), /wealth skills and investing skills for Claude, Claude Code/);
+});
+
+test('Site: The Chat Tab Ships With Every Scenario, Tool And Mode', async () => {
+  const { SCENARIOS } = await import('../src/engines/assistant.js');
+  assert.match(index, /id="tab-chat" class="tab-content active"/, 'chat is the tab people land on');
+  assert.match(index, /data-tab="tab-chat"/);
+  assert.match(index, /id="chat-log"/);
+
+  for (const element of ['chat-form', 'chat-input', 'chat-chips', 'chat-key', 'chat-model', 'chat-key-clear', 'chat-tool-index', 'chat-mode-note']) {
+    assert.match(index, new RegExp(`id="${element}"`), `the chat needs #${element}`);
+  }
+  assert.ok(SCENARIOS.length >= 6);
+  // Demo mode must not be gated behind a key.
+  assert.match(index, /value="demo" checked/);
+});
+
+test('Site: Browser Calls To Claude Carry The Required Headers And Never Store The Key', () => {
+  const script = index.slice(index.indexOf('<script type="module">'));
+
+  assert.match(script, /https:\/\/api\.anthropic\.com\/v1\/messages/);
+  assert.match(script, /'anthropic-version': '2023-06-01'/);
+  // Anthropic rejects browser-origin calls without this opt-in.
+  assert.match(script, /'anthropic-dangerous-direct-browser-access': 'true'/);
+  assert.match(script, /'x-api-key': apiKey/);
+  assert.match(script, /stop_reason !== 'tool_use'/, 'the tool loop must end when Claude stops calling tools');
+  assert.match(script, /stop_reason === 'refusal'/, 'a refusal must be surfaced, not treated as an answer');
+
+  // The key lives in a closure for the tab's lifetime only.
+  assert.doesNotMatch(script, /localStorage|sessionStorage|indexedDB|document\.cookie/);
+  const apiHost = [...script.matchAll(/fetch\(\s*'([^']+)'/g)].map(match => match[1]);
+  assert.deepEqual(apiHost, ['https://api.anthropic.com/v1/messages'], 'the page makes no other network calls');
 });

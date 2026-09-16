@@ -83,6 +83,11 @@
           },
           {
             "@type": "Question",
+            "name": "Can I try the skills without installing anything?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Yes. The Ask the Skills tab is a chat you can use with no API key: pick an example question and it runs the real calculation engines in your browser, showing each tool call, the figures, the questions it needs answered and the suggested next steps. You can also paste your own Anthropic API key to have Claude choose and call the same tools, which still run locally in the page. The key is kept only in the browser tab, never stored or sent anywhere except api.anthropic.com." }
+          },
+          {
+            "@type": "Question",
             "name": "Does Wealth Skills place trades or give investment advice?",
             "acceptedAnswer": { "@type": "Answer", "text": "No. It prepares analysis and order payloads for a licensed professional to review. It never submits orders or moves money, and results that affect a client carry requiresHumanApproval." }
           },
@@ -350,6 +355,37 @@
     .faq details { background: var(--bg-card); border: 1px solid var(--border-card); border-radius: 12px; padding: 14px 18px; margin-bottom: 10px; }
     .faq summary { cursor: pointer; font-weight: 600; }
     .faq details p { margin-top: 10px; }
+    .chat-grid { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 24px; }
+    @media (max-width: 900px) { .chat-grid { grid-template-columns: 1fr; } }
+    .chat-log { min-height: 320px; max-height: 60vh; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; padding-right: 4px; }
+    .msg { max-width: 92%; padding: 12px 16px; border-radius: 14px; font-size: 14px; line-height: 1.55; white-space: pre-wrap; }
+    .msg.user { align-self: flex-end; background: rgba(59, 130, 246, 0.18); border: 1px solid rgba(59, 130, 246, 0.35); }
+    .msg.assistant { align-self: flex-start; background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border-card); }
+    .msg.error { align-self: flex-start; background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.5); color: #fde68a; }
+    .tool-card { align-self: flex-start; width: 100%; background: rgba(10, 13, 20, 0.75); border: 1px solid var(--border-card); border-radius: 14px; padding: 14px 16px; font-size: 13px; }
+    .tool-card h4 { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; color: var(--accent-emerald); margin-bottom: 8px; }
+    .tool-card table { width: 100%; border-collapse: collapse; margin-bottom: 8px; }
+    .tool-card td { padding: 3px 0; vertical-align: top; }
+    .tool-card td:first-child { color: var(--text-muted); padding-right: 12px; white-space: nowrap; }
+    .tool-card td:last-child { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .tool-card details { margin-top: 8px; }
+    .tool-card summary { cursor: pointer; color: var(--text-muted); }
+    .tool-card pre { margin-top: 8px; max-height: 260px; overflow: auto; font-size: 12px; color: #a7f3d0; }
+    .ask-list { margin: 8px 0 0 18px; color: #fde68a; }
+    .next-list { margin: 8px 0 0 18px; color: var(--text-muted); }
+    .chip-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 12px; }
+    .chip { background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border-card); color: var(--text-main); border-radius: 999px; padding: 7px 14px; font-size: 13px; cursor: pointer; text-align: left; }
+    .chip:hover { border-color: var(--accent-blue); }
+    .chat-form { display: flex; gap: 10px; }
+    .chat-form input { flex: 1; }
+    .btn { background: var(--accent-blue); border: none; color: #fff; border-radius: 10px; padding: 12px 18px; font-size: 14px; font-weight: 600; cursor: pointer; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn.secondary { background: rgba(255, 255, 255, 0.06); border: 1px solid var(--border-card); }
+    .mode-row { display: flex; gap: 10px; margin-bottom: 16px; }
+    .mode-row label { flex: 1; display: flex; gap: 8px; align-items: flex-start; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-card); border-radius: 10px; padding: 10px 12px; font-size: 13px; cursor: pointer; }
+    .hint { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+    .tool-index { max-height: 260px; overflow-y: auto; font-size: 12px; color: var(--text-muted); }
+    .tool-index code { color: var(--accent-emerald); }
     .site-footer { margin-top: 32px; padding-top: 20px; border-top: 1px solid var(--border-card); color: var(--text-muted); font-size: 12px; }
     .module-warning code { color: #fff; }
   </style>
@@ -377,13 +413,14 @@
 
   <section class="intro" aria-labelledby="intro-title">
     <h2 id="intro-title">Wealth management and investing skills for Claude and other AI agents</h2>
-    <p>Wealth Skills is an open-source set of <strong>Claude skills for wealth management</strong>: skill packs, calculation code and MCP tools that turn Claude, Claude Code, Codex and Cursor into capable assistants for financial advisors, family offices and investment teams. These investing skills and wealth skills help with tax and retirement planning, portfolio risk and performance, trade preparation, onboarding, compliance and fund operations. Every figure on this page comes from the same zero-dependency JavaScript engines the <a href="https://github.com/ai-theories/wealth-skills#cli">CLI</a> and <a href="https://github.com/ai-theories/wealth-skills#mcp-servers">MCP servers</a> run. Nothing leaves your browser, nothing is traded, and every result is for a licensed professional to review.</p>
+    <p>Wealth Skills is an open-source set of <strong>Claude skills for wealth management</strong>: skill packs, calculation code and MCP tools that turn Claude, Claude Code, Codex and Cursor into capable assistants for financial advisors, family offices and investment teams. Ask a question in the chat below and it runs the matching skill in front of you, with no sign-up and no API key. These investing skills and wealth skills help with tax and retirement planning, portfolio risk and performance, trade preparation, onboarding, compliance and fund operations. Every figure on this page comes from the same zero-dependency JavaScript engines the <a href="https://github.com/ai-theories/wealth-skills#cli">CLI</a> and <a href="https://github.com/ai-theories/wealth-skills#mcp-servers">MCP servers</a> run. Nothing leaves your browser, nothing is traded, and every result is for a licensed professional to review.</p>
   </section>
 
   <main>
   <!-- Navigation Tabs -->
   <nav class="tabs-nav" aria-label="Calculators">
-    <button class="tab-btn active" data-tab="tab-planning">Tax & Retirement Planning</button>
+    <button class="tab-btn active" data-tab="tab-chat">Ask the Skills (Chat)</button>
+    <button class="tab-btn" data-tab="tab-planning">Tax &amp; Retirement Planning</button>
     <button class="tab-btn" data-tab="tab-portfolio">Portfolio Drift & Risk (VaR)</button>
     <button class="tab-btn" data-tab="tab-quant">Quantitative Backtesting</button>
     <button class="tab-btn" data-tab="tab-uhnw">UHNW Concentrated Collar & PE</button>
@@ -395,8 +432,54 @@
     <button class="tab-btn" data-tab="tab-fundops">Fund NAV Tie-Out</button>
   </nav>
 
+  <!-- TAB 0: Chat -->
+  <section id="tab-chat" class="tab-content active" aria-labelledby="chat-title">
+    <div class="chat-grid">
+      <div class="card">
+        <h2 id="chat-title">Ask the skills</h2>
+        <div id="chat-log" class="chat-log" aria-live="polite"></div>
+        <div id="chat-chips" class="chip-row"></div>
+        <form id="chat-form" class="chat-form">
+          <label for="chat-input" class="sr-only" style="position:absolute;left:-9999px;">Your question</label>
+          <input id="chat-input" class="form-control" type="text" autocomplete="off" placeholder="Ask about a client situation, or pick an example above">
+          <button class="btn" id="chat-send" type="submit">Send</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2>How answers are produced</h2>
+        <div class="mode-row">
+          <label><input type="radio" name="chat-mode" value="demo" checked> <span><b>Demo</b><br><span class="hint">No key. Runs the real engines in your browser; a keyword matcher picks the skill.</span></span></label>
+          <label><input type="radio" name="chat-mode" value="api"> <span><b>Your Claude key</b><br><span class="hint">Claude picks and calls the same tools, which still run in your browser.</span></span></label>
+        </div>
+
+        <div id="chat-key-panel" hidden>
+          <div class="form-group">
+            <label for="chat-key">Anthropic API key</label>
+            <input type="password" id="chat-key" class="form-control" placeholder="sk-ant-..." autocomplete="off" spellcheck="false">
+          </div>
+          <div class="form-group">
+            <label for="chat-model">Model</label>
+            <select id="chat-model" class="form-control">
+              <option value="claude-opus-5">Claude Opus 5</option>
+              <option value="claude-sonnet-5">Claude Sonnet 5</option>
+              <option value="claude-haiku-4-5">Claude Haiku 4.5</option>
+            </select>
+          </div>
+          <button class="btn secondary" id="chat-key-clear" type="button">Forget key</button>
+          <p class="hint" style="margin-top:12px;">Your key stays in this browser tab: it is sent only to <code>api.anthropic.com</code>, never stored, never logged, and it is gone when you reload. Calls are billed to your account. Create a key at <a href="https://console.anthropic.com/settings/keys">console.anthropic.com</a>. If you would rather not paste a key here, clone the repo and run the same tools from the CLI or an MCP client.</p>
+        </div>
+
+        <p class="hint" id="chat-mode-note">Every number comes from the same engines the CLI and MCP servers run. Nothing is traded, nothing leaves your browser in demo mode, and results that affect a client are marked for human approval.</p>
+
+        <h2 style="margin-top:24px;">Tools it can call</h2>
+        <div class="tool-index" id="chat-tool-index"></div>
+      </div>
+    </div>
+  </section>
+
   <!-- TAB 1: Tax & Retirement Planning -->
-  <div id="tab-planning" class="tab-content active">
+  <div id="tab-planning" class="tab-content">
     <div class="grid-2">
       <div class="card">
         <h2>Roth Conversion & RMD Calculator</h2>
@@ -722,6 +805,10 @@
       <p>Yes. The same wealth management skills and investing skills run in Claude Code, Claude Desktop and any MCP client, and in coding agents such as OpenAI Codex, Cursor and Google Antigravity through the command-line interface or the JavaScript library.</p>
     </details>
     <details>
+      <summary>Can I try the skills without installing anything?</summary>
+      <p>Yes. The <a href="#tab-chat">Ask the Skills</a> tab is a chat you can use with no API key: pick an example question and it runs the real calculation engines in your browser, showing each tool call, the figures, the questions it needs answered and the suggested next steps. You can also paste your own Anthropic API key to have Claude choose and call the same tools, which still run locally in the page. The key is kept only in the browser tab, never stored or sent anywhere except <code>api.anthropic.com</code>.</p>
+    </details>
+    <details>
       <summary>Does Wealth Skills place trades or give investment advice?</summary>
       <p>No. It prepares analysis and order payloads for a licensed professional to review. It never submits orders or moves money, and results that affect a client carry <code>requiresHumanApproval</code>.</p>
     </details>
@@ -766,6 +853,8 @@
     import { checkSuitability } from './src/engines/compliance.js';
     import { validateSecurityIdentifier, calculateSettlementDate } from './src/engines/markets.js';
     import { tieOutNav } from './src/engines/fundops.js';
+    import { WEALTH_TOOLS, runTool, anthropicToolSchemas, toolByCommand } from './src/engines/tools.js';
+    import { SCENARIOS, EXAMPLE_ARGS, runScenario, routeRequest, highlights, systemPrompt } from './src/engines/assistant.js';
 
     // Every figure on this page comes from the library engines. Nothing is recomputed or hardcoded
     // here, so the dashboard cannot drift from the CLI and MCP tools.
@@ -930,6 +1019,267 @@
       for (const id of ids) bindings.push([id, $(id).tagName === 'SELECT' ? 'change' : 'input', handler]);
     }
     for (const [id, eventName, handler] of bindings) $(id).addEventListener(eventName, handler);
+
+
+    // --- Chat ------------------------------------------------------------------------------------
+    // Demo mode runs the engines directly. Key mode sends the same tool definitions to the Messages
+    // API and executes whatever Claude calls, here in the browser. The key is held in this closure
+    // only: never written to storage, never sent anywhere except api.anthropic.com.
+    let apiKey = '';
+    let busy = false;
+
+    const log = $('chat-log');
+    const chatMode = () => document.querySelector('input[name="chat-mode"]:checked').value;
+
+    function bubble(role, text) {
+      const el = document.createElement('div');
+      el.className = `msg ${role}`;
+      el.textContent = text;
+      log.appendChild(el);
+      log.scrollTop = log.scrollHeight;
+      return el;
+    }
+
+    const ACRONYMS = new Set(['rmd', 'nav', 'irr', 'twr', 'var', 'niit', 'cip', 'agi', 'magi', 'dpi', 'tvpi', 'rvpi', 'pe', 'lp', 'sec', 'finra', 'isin', 'cusip', 'figi', 'lei', 'crd', 'fix', 'iapd', 'dcf', 'era']);
+
+    function label(key) {
+      return key.split(/(?=[A-Z])|_/).map((word, index) => {
+        const lower = word.toLowerCase();
+        if (ACRONYMS.has(lower)) return lower.toUpperCase();
+        return index === 0 ? word.charAt(0).toUpperCase() + word.slice(1) : lower;
+      }).join(' ');
+    }
+
+    function toolCard(command, args, result) {
+      const card = document.createElement('div');
+      card.className = 'tool-card';
+
+      const title = document.createElement('h4');
+      title.textContent = `▸ ${command}`;
+      card.appendChild(title);
+
+      const table = document.createElement('table');
+      for (const { key, value } of highlights(result)) {
+        const row = table.insertRow();
+        row.insertCell().textContent = label(key);
+        // Years and small counts read wrong with thousands separators.
+        row.insertCell().textContent = typeof value === 'number' && Math.abs(value) >= 10000 ? value.toLocaleString() : value;
+      }
+      card.appendChild(table);
+
+      if (result.needsInput?.length) {
+        const ask = document.createElement('ul');
+        ask.className = 'ask-list';
+        for (const question of result.needsInput) {
+          const li = document.createElement('li');
+          li.textContent = question.question;
+          ask.appendChild(li);
+        }
+        card.appendChild(ask);
+      }
+      if (result.suggestedNextSteps?.length) {
+        const next = document.createElement('ul');
+        next.className = 'next-list';
+        for (const step of result.suggestedNextSteps) {
+          const li = document.createElement('li');
+          li.textContent = step.tool ? `Next: ${step.tool} — ${step.why}` : `${step.action} — ${step.why}`;
+          next.appendChild(li);
+        }
+        card.appendChild(next);
+      }
+
+      const details = document.createElement('details');
+      const summary = document.createElement('summary');
+      summary.textContent = 'Arguments and full JSON result';
+      const pre = document.createElement('pre');
+      pre.textContent = `// arguments\n${JSON.stringify(args, null, 2)}\n\n// result\n${JSON.stringify(result, null, 2)}`;
+      details.append(summary, pre);
+      card.appendChild(details);
+
+      log.appendChild(card);
+      log.scrollTop = log.scrollHeight;
+    }
+
+    const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+    async function runDemoScenario(id) {
+      const scenario = runScenario(id);
+      for (const step of scenario.steps) {
+        await wait(260);
+        bubble('assistant', step.say);
+        await wait(160);
+        toolCard(step.command, step.args, step.result);
+      }
+      await wait(260);
+      bubble('assistant', scenario.closing);
+    }
+
+    async function runDemoRequest(text) {
+      const routed = routeRequest(text);
+
+      if (routed.matches.length === 0) {
+        bubble('assistant', "I can't match that to a skill. I answer questions about tax and retirement planning, portfolios and performance, trade preparation, onboarding, compliance, research, concentrated positions and fund operations. Try one of the examples above, or name a calculation such as \"value at risk\" or \"required minimum distribution\".");
+        return;
+      }
+
+      if (!routed.confident) {
+        const options = routed.matches.map(match => `• ${match.command} — ${match.summary}`).join('\n');
+        bubble('assistant', `That could be a few different skills. Which did you mean?\n\n${options}\n\nIn demo mode I match on keywords, so a Claude key (right) handles a question like that properly.`);
+        return;
+      }
+
+      const best = routed.matches[0];
+      const args = EXAMPLE_ARGS[best.tool];
+      bubble('assistant', `That is \`${best.command}\`: ${best.summary} It needs ${best.requiredInputs.join(', ')}. Demo mode has no way to read those from your sentence, so I am running it on the built-in example inputs.`);
+      await wait(200);
+      toolCard(best.command, args, runTool(best.tool, args));
+      await wait(200);
+      bubble('assistant', 'Open "Arguments and full JSON result" to see exactly what went in and what came back. The CLI and the MCP tool return the same thing.');
+    }
+
+    async function callClaude(messages) {
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          // Required for calls made straight from a browser, which is why this is a bring-your-own-key demo.
+          'anthropic-dangerous-direct-browser-access': 'true'
+        },
+        body: JSON.stringify({
+          model: $('chat-model').value,
+          max_tokens: 8000,
+          system: systemPrompt(),
+          tools: anthropicToolSchemas(),
+          messages
+        })
+      });
+
+      if (!response.ok) {
+        const detail = await response.text();
+        throw new Error(`Claude API ${response.status}: ${detail.slice(0, 400)}`);
+      }
+      return response.json();
+    }
+
+    async function runWithClaude(text, history) {
+      history.push({ role: 'user', content: text });
+
+      for (let turn = 0; turn < 8; turn++) {
+        const message = await callClaude(history);
+        history.push({ role: 'assistant', content: message.content });
+
+        for (const block of message.content) {
+          if (block.type === 'text' && block.text.trim()) bubble('assistant', block.text.trim());
+        }
+        if (message.stop_reason === 'refusal') {
+          bubble('error', 'Claude declined this request.');
+          return;
+        }
+        if (message.stop_reason !== 'tool_use') return;
+
+        // Every tool_result for a turn goes back in one user message, or Claude stops calling tools in parallel.
+        const results = [];
+        for (const block of message.content.filter(b => b.type === 'tool_use')) {
+          let payload;
+          let isError = false;
+          try {
+            payload = runTool(block.name, block.input);
+            toolCard(toolByCommand(payload.auditMetadata?.tool)?.command ?? block.name, block.input, payload);
+          } catch (err) {
+            isError = true;
+            payload = { error: err.message, needsInput: err.needsInput ?? [] };
+            bubble('error', `${block.name} could not run: ${err.message}`);
+          }
+          results.push({ type: 'tool_result', tool_use_id: block.id, content: JSON.stringify(payload), is_error: isError });
+        }
+        history.push({ role: 'user', content: results });
+      }
+      bubble('error', 'Stopping after 8 tool rounds.');
+    }
+
+    const apiHistory = [];
+
+    async function submitChat(text, scenarioId) {
+      if (busy || (!text && !scenarioId)) return;
+      busy = true;
+      $('chat-send').disabled = true;
+
+      try {
+        if (scenarioId) {
+          const scenario = SCENARIOS.find(s => s.id === scenarioId);
+          bubble('user', scenario.prompt);
+          if (chatMode() === 'api' && apiKey) await runWithClaude(scenario.prompt, apiHistory);
+          else await runDemoScenario(scenarioId);
+        } else {
+          bubble('user', text);
+          if (chatMode() === 'api') {
+            if (!apiKey) bubble('error', 'Add your Anthropic API key on the right, or switch back to demo mode.');
+            else await runWithClaude(text, apiHistory);
+          } else {
+            await runDemoRequest(text);
+          }
+        }
+      } catch (err) {
+        bubble('error', `Something went wrong: ${err.message}`);
+      } finally {
+        busy = false;
+        $('chat-send').disabled = false;
+        $('chat-input').focus();
+      }
+    }
+
+    function initChat() {
+      bubble('assistant', `Ask me about a client situation and I will run the matching skill. There are ${WEALTH_TOOLS.length} tools behind this chat, the same ones the CLI and the MCP servers expose, and every figure comes from real calculation code running in your browser. Nothing is traded and nothing is advice.`);
+
+      for (const scenario of SCENARIOS) {
+        const chip = document.createElement('button');
+        chip.className = 'chip';
+        chip.type = 'button';
+        chip.textContent = scenario.prompt.length > 74 ? `${scenario.prompt.slice(0, 74)}…` : scenario.prompt;
+        chip.title = scenario.prompt;
+        chip.addEventListener('click', () => submitChat(null, scenario.id));
+        $('chat-chips').appendChild(chip);
+      }
+
+      const index = $('chat-tool-index');
+      for (const tool of WEALTH_TOOLS) {
+        const row = document.createElement('div');
+        row.innerHTML = `<code>${tool.command}</code> — ${tool.skillPack.replace('wealth-', '')}`;
+        index.appendChild(row);
+      }
+
+      $('chat-form').addEventListener('submit', (event) => {
+        event.preventDefault();
+        const text = $('chat-input').value.trim();
+        $('chat-input').value = '';
+        submitChat(text, null);
+      });
+
+      for (const radio of document.querySelectorAll('input[name="chat-mode"]')) {
+        radio.addEventListener('change', () => {
+          const api = chatMode() === 'api';
+          $('chat-key-panel').hidden = !api;
+          $('chat-mode-note').textContent = api
+            ? 'Claude decides which tools to call. The tools themselves still run here in your browser, and their results are what Claude sees.'
+            : 'Every number comes from the same engines the CLI and MCP servers run. Nothing is traded, nothing leaves your browser in demo mode, and results that affect a client are marked for human approval.';
+        });
+      }
+
+      $('chat-key').addEventListener('change', (event) => {
+        apiKey = event.target.value.trim();
+        if (apiKey) bubble('assistant', 'Key set for this tab. Ask a question and I will let Claude choose the tools.');
+      });
+      $('chat-key-clear').addEventListener('click', () => {
+        apiKey = '';
+        $('chat-key').value = '';
+        apiHistory.length = 0;
+        bubble('assistant', 'Key forgotten and the conversation cleared.');
+      });
+    }
+
+    initChat();
 
     updatePlanning();
     updatePortfolio();

@@ -839,7 +839,7 @@ A second server, `sec-iapd-lookup`, provides `lookup_adviser_registration`. It r
 npm run dashboard
 ```
 
-Then open http://127.0.0.1:4173/ to try the calculators in a browser: tax and retirement planning, capital losses and NIIT, portfolio drift and risk, performance returns, backtests, collars, FIX orders and identifiers, suitability, and a fund NAV tie-out. They run the same engines as the CLI. The same page is published at [ai-theories.github.io/wealth-skills](https://ai-theories.github.io/wealth-skills/).
+Then open http://127.0.0.1:4173/. The **Ask the Skills** tab is a chat: pick an example question and it runs the real engines in your browser, showing each tool call, its figures, the questions it still needs answered and what to do next. Paste an Anthropic API key and Claude picks the tools instead, calling the same 35 definitions; the key stays in the browser tab and the tools still run locally. The other tabs are direct calculators: tax and retirement planning, capital losses and NIIT, portfolio drift and risk, performance returns, backtests, collars, FIX orders and identifiers, suitability, and a fund NAV tie-out. They run the same engines as the CLI. The same page is published at [ai-theories.github.io/wealth-skills](https://ai-theories.github.io/wealth-skills/).
 
 ## What it does not do
 
@@ -859,6 +859,8 @@ Then open http://127.0.0.1:4173/ to try the calculators in a browser: tax and re
 | `bin/wealth-skills.js` | Command-line interface |
 | `mcp-servers/` | The calculation and IAPD lookup MCP servers and their shared protocol layer |
 | `dashboard.html` | Browser dashboard, served locally by `bin/serve-dashboard.js` |
+| `src/engines/tools.js` | The 35 tool definitions shared by the MCP server, the CLI examples and the browser chat |
+| `src/engines/assistant.js` | Scripted demo conversations, request routing and the system prompt for the chat |
 | `bin/build-site.js`, `site/` | Builds the GitHub Pages site: the dashboard, robots.txt, sitemap, llms.txt and the social image |
 | `tests/` | Test suite, including fictitious IAPD records in the SEC schemas (`tests/fixtures/iapd/`) |
 | `docs/` | Integration, compliance and formatting guides |
